@@ -26,6 +26,19 @@ Extensión universal de VS Code para generar mensajes de commit asistidos por IA
 - [ ] Configuración de API Key via SecretStorage
 - [ ] Manejo básico de errores (sin key, sin cambios, sin conexión)
 
+### MVP v0.2.0 - Git Changes Panel
+
+- [ ] Sección "Changes" con lista de archivos modificados (unstaged)
+- [ ] Counter de archivos con cambios
+- [ ] Botón "Stage All Changes"
+- [ ] Botón "Discard All Changes"
+- [ ] Sección "Staged Changes" con lista de archivos en staging
+- [ ] Counter de archivos staged
+- [ ] Botón "Unstage All Changes"
+- [ ] Botón "Commit" para ejecutar commit directamente
+- [ ] Input editable para el mensaje de commit
+- [ ] Actualización reactiva al detectar cambios en el repositorio
+
 ### Post-MVP (Futuro)
 
 - [ ] Historial de commits generados
@@ -36,6 +49,9 @@ Extensión universal de VS Code para generar mensajes de commit asistidos por IA
 - [ ] Integración con otros modelos de IA (OpenAI, Claude, Ollama)
 - [ ] Análisis de calidad del commit
 - [ ] Templates personalizables
+- [ ] Stage/Unstage individual por archivo
+- [ ] Discard individual por archivo
+- [ ] Vista de diff por archivo
 
 ---
 
