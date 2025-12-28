@@ -1,23 +1,89 @@
 {
   "name": "cleancommit",
   "displayName": "CleanCommit",
-  "description": "",
-  "version": "0.0.1",
+  "description": "AI-powered commit message generator using Conventional Commits",
+  "version": "0.1.0",
+  "publisher": "cleancommit-dev",
+  "icon": "resources/icon.png",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
-    "Other"
+    "SCM Providers",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "git",
+    "commit",
+    "ai",
+    "conventional-commits",
+    "gemini"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cleancommit-container",
+          "title": "CleanCommit",
+          "icon": "resources/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "cleancommit-container": [
+        {
+          "type": "webview",
+          "id": "cleancommit.sidebar",
+          "name": "Commit Assistant",
+          "icon": "resources/icon.png"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "cleancommit.helloWorld",
-        "title": "Hello World"
+        "command": "cleancommit.generateCommit",
+        "title": "Generate Commit Message",
+        "category": "CleanCommit"
+      },
+      {
+        "command": "cleancommit.setApiKey",
+        "title": "Set Gemini API Key",
+        "category": "CleanCommit"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "CleanCommit",
+      "properties": {
+        "cleancommit.language": {
+          "type": "string",
+          "default": "en",
+          "enum": [
+            "en",
+            "es"
+          ],
+          "enumDescriptions": [
+            "English",
+            "Spanish"
+          ],
+          "description": "Language for generated commit messages"
+        },
+        "cleancommit.includeBody": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include detailed body in commit message"
+        },
+        "cleancommit.maxDiffSize": {
+          "type": "number",
+          "default": 4000,
+          "description": "Maximum diff size in characters to send to AI"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -33,16 +99,20 @@
     "lint": "eslint src",
     "test": "vscode-test"
   },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0"
+  },
   "devDependencies": {
-    "@types/vscode": "^1.107.0",
+    "@types/vscode": "^1.90.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.48.1",
-    "eslint": "^9.39.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.0.0",
     "esbuild": "^0.27.1",
+    "eslint": "^9.39.1",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.9.3",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "typescript-eslint": "^8.48.1"
   }
 }
