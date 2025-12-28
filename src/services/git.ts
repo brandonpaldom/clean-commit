@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 
 export interface API {
   readonly repositories: Repository[];
+  onDidOpenRepository: vscode.Event<Repository>;
+  onDidCloseRepository: vscode.Event<Repository>;
 }
 
 export interface Repository {

@@ -144,12 +144,42 @@ export class GitService {
   }
 
   onDidChangeRepository(callback: () => void): vscode.Disposable {
-    const repo = this.getRepository();
-    if (!repo) {
-      return { dispose: () => {} };
+    const disposables: vscode.Disposable[] = [];
+    let repoDisposable: vscode.Disposable | undefined;
+
+    const updateRepoSubscription = () => {
+      if (repoDisposable) {
+        repoDisposable.dispose();
+        repoDisposable = undefined;
+      }
+
+      const repo = this.getRepository();
+      if (repo) {
+        repoDisposable = repo.state.onDidChange(callback);
+        disposables.push(repoDisposable);
+      }
+      
+      // Trigger update immediately when repo found or changed
+      callback();
+    };
+
+    // 1. Initial subscription
+    updateRepoSubscription();
+
+    // 2. Listen for new repositories being opened/closed to update subscription
+    if (this.gitApi) {
+      disposables.push(this.gitApi.onDidOpenRepository(() => updateRepoSubscription()));
+      disposables.push(this.gitApi.onDidCloseRepository(() => updateRepoSubscription()));
     }
 
-    return repo.state.onDidChange(callback);
+    return {
+      dispose: () => {
+        if (repoDisposable) {
+          repoDisposable.dispose();
+        }
+        disposables.forEach(d => d.dispose());
+      }
+    };
   }
 
   async getStagedDiff(): Promise<string | null> {
