@@ -2,7 +2,7 @@
   "name": "cleancommit",
   "displayName": "CleanCommit",
   "description": "AI-powered commit message generator using Conventional Commits",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "cleancommit-dev",
   "icon": "resources/icon.png",
   "engines": {

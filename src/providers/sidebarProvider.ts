@@ -11,6 +11,7 @@ import type {
 export class SidebarProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView;
   private gitService: GitService;
+  private disposables: vscode.Disposable[] = [];
 
   constructor(
     private readonly extensionUri: vscode.Uri,
@@ -30,9 +31,42 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = await this.getHtmlContent(webviewView.webview);
 
     await this.gitService.initialize();
+    
+    // Setup Git repository watcher
+    this.setupRepositoryWatcher();
 
     webviewView.webview.onDidReceiveMessage((message: WebviewToExtensionMessage) => {
       this.handleMessage(message);
+    });
+
+    webviewView.onDidDispose(() => {
+      this.disposables.forEach(d => d.dispose());
+      this.disposables = [];
+    });
+  }
+
+  private setupRepositoryWatcher(): void {
+    const disposable = this.gitService.onDidChangeRepository(() => {
+      this.sendChangesUpdate();
+    });
+
+    this.disposables.push(disposable);
+  }
+
+  private async sendChangesUpdate(): Promise<void> {
+    if (!this.view) {
+      return;
+    }
+
+    const [changes, staged] = await Promise.all([
+      this.gitService.getChanges(),
+      this.gitService.getStagedChanges(),
+    ]);
+
+    this.postMessage({
+      type: 'changesUpdated',
+      changes,
+      staged,
     });
   }
 
@@ -40,6 +74,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     switch (message.command) {
       case 'webviewReady':
         await this.sendInitialState();
+        await this.sendChangesUpdate();
         break;
 
       case 'generateCommit':
@@ -62,7 +97,97 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       case 'openSettings':
         vscode.commands.executeCommand('workbench.action.openSettings', 'cleancommit');
         break;
+
+      case 'stageAll':
+        try {
+          await this.gitService.stageAll();
+          // No need to manually refresh here as the watcher will catch it, but let's be safe
+          await this.sendChangesUpdate();
+        } catch (error) {
+          this.showError('Failed to stage changes', error);
+        }
+        break;
+
+      case 'unstageAll':
+        try {
+          await this.gitService.unstageAll();
+          await this.sendChangesUpdate();
+        } catch (error) {
+          this.showError('Failed to unstage changes', error);
+        }
+        break;
+
+      case 'discardAll':
+        const confirm = await vscode.window.showWarningMessage(
+          'Discard all changes? This cannot be undone.',
+          { modal: true },
+          'Discard'
+        );
+        if (confirm === 'Discard') {
+          try {
+            await this.gitService.discardAll();
+            await this.sendChangesUpdate();
+          } catch (error) {
+            this.showError('Failed to discard changes', error);
+          }
+        }
+        break;
+
+      case 'commit':
+        try {
+          await this.gitService.commit(message.message);
+          this.postMessage({ type: 'commitSuccess' });
+          vscode.window.showInformationMessage('Commit created successfully!');
+          // The repository watcher should trigger a refresh automatically
+        } catch (error) {
+          this.showError('Failed to commit', error);
+        }
+        break;
+
+      case 'refreshChanges':
+        await this.sendChangesUpdate();
+        break;
+
+      case 'stageFile':
+        try {
+          await this.gitService.stageFile(message.path);
+          await this.sendChangesUpdate();
+        } catch (error) {
+          this.showError('Failed to stage file', error);
+        }
+        break;
+
+      case 'unstageFile':
+        try {
+          await this.gitService.unstageFile(message.path);
+          await this.sendChangesUpdate();
+        } catch (error) {
+          this.showError('Failed to unstage file', error);
+        }
+        break;
+
+      case 'discardFile':
+        const fileConfirm = await vscode.window.showWarningMessage(
+          `Discard changes in ${vscode.Uri.file(message.path).fsPath}?`,
+          { modal: true },
+          'Discard'
+        );
+        if (fileConfirm === 'Discard') {
+          try {
+            await this.gitService.discardFile(message.path);
+            await this.sendChangesUpdate();
+          } catch (error) {
+            this.showError('Failed to discard file', error);
+          }
+        }
+        break;
     }
+  }
+
+  private showError(title: string, error: any) {
+    const message = error instanceof Error ? error.message : String(error);
+    vscode.window.showErrorMessage(`${title}: ${message}`);
+    this.postMessage({ type: 'error', error: message, code: 'UNKNOWN' });
   }
 
   private async handleGenerateCommit(): Promise<void> {
@@ -160,10 +285,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       </div>
 
       <div id="main-content" class="hidden">
-        <button class="primary" id="btn-generate" disabled title="Stage some changes first">
-          Generate Commit Message
-        </button>
-        <p class="info" id="staged-info">No staged changes found</p>
+        <div class="section">
+          <div class="section-header">
+            <span>Commit Message</span>
+            <button class="icon-button" id="btn-refresh" title="Refresh changes">🔄</button>
+          </div>
+          <textarea id="commit-message" class="commit-input" placeholder="Enter commit message or generate..."></textarea>
+          
+          <div class="button-row">
+            <button class="primary" id="btn-generate" title="Generate with AI">✨ Generate</button>
+            <button class="primary btn-commit" id="btn-commit" title="Commit staged changes">🚀 Commit</button>
+          </div>
+        </div>
 
         <div id="loading" class="loading hidden">
           <div class="spinner"></div>
@@ -172,11 +305,32 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
         <div id="error" class="error hidden"></div>
 
-        <div id="result" class="hidden">
-          <div class="message-box" id="generated-message"></div>
-          <div class="actions">
-            <button class="primary" id="btn-insert">Insert</button>
-            <button class="secondary" id="btn-copy">Copy</button>
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-header">
+            <span>Staged Changes</span>
+            <span class="counter" id="staged-count">0</span>
+          </div>
+          <div id="staged-list" class="file-list">
+            <div class="empty-state">No staged changes</div>
+          </div>
+          <button class="secondary full-width" id="btn-unstage-all">Unstage All</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-header">
+            <span>Changes</span>
+            <span class="counter" id="changes-count">0</span>
+          </div>
+          <div id="changes-list" class="file-list">
+            <div class="empty-state">No changes</div>
+          </div>
+          <div class="button-row">
+            <button class="secondary" id="btn-stage-all">Stage All</button>
+            <button class="secondary btn-danger" id="btn-discard-all">Discard All</button>
           </div>
         </div>
       </div>
