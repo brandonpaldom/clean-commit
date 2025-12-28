@@ -1063,3 +1063,449 @@ suite('GitService Test Suite', () => {
 - [ ] `.vsix` generado y probado manualmente
 - [ ] Cuenta en VS Marketplace
 - [ ] Cuenta en Open VSX
+
+---
+
+## 17. Feature: Git Changes Panel (v0.2.0)
+
+### 17.1 Descripción
+
+Panel integrado en el sidebar que permite a los usuarios visualizar y gestionar sus cambios de Git directamente desde la extensión, sin necesidad de cambiar al panel de Source Control nativo.
+
+### 17.2 Mockup UI
+
+```
+┌─────────────────────────────────────┐
+│  CleanCommit                        │
+├─────────────────────────────────────┤
+│                                     │
+│  ┌─────────────────────────────────┐│
+│  │ 📝 Commit Message               ││
+│  │ ┌─────────────────────────────┐ ││
+│  │ │ feat(auth): add login...   │ ││
+│  │ └─────────────────────────────┘ ││
+│  │ [✨ Generate]                   ││
+│  └─────────────────────────────────┘│
+│                                     │
+│  ─────────────────────────────────  │
+│                                     │
+│  📂 Changes (3)                     │
+│  ┌─────────────────────────────────┐│
+│  │ M  src/extension.ts             ││
+│  │ M  src/services/git.ts          ││
+│  │ A  src/utils/helper.ts          ││
+│  └─────────────────────────────────┘│
+│  [Stage All]  [Discard All]         │
+│                                     │
+│  ─────────────────────────────────  │
+│                                     │
+│  ✅ Staged Changes (2)              │
+│  ┌─────────────────────────────────┐│
+│  │ M  package.json                 ││
+│  │ M  README.md                    ││
+│  └─────────────────────────────────┘│
+│  [Unstage All]                      │
+│                                     │
+│  ─────────────────────────────────  │
+│                                     │
+│  [        🚀 Commit        ]        │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+### 17.3 Componentes UI
+
+| Componente | Descripción |
+|------------|-------------|
+| **Commit Message Input** | Textarea editable para el mensaje de commit |
+| **Generate Button** | Genera mensaje con IA (feature existente) |
+| **Changes Section** | Lista de archivos modificados no staged |
+| **Changes Counter** | Badge con número de archivos con cambios |
+| **Stage All Button** | Añade todos los cambios al staging |
+| **Discard All Button** | Descarta todos los cambios (con confirmación) |
+| **Staged Section** | Lista de archivos en staging area |
+| **Staged Counter** | Badge con número de archivos staged |
+| **Unstage All Button** | Quita todos los archivos del staging |
+| **Commit Button** | Ejecuta el commit con el mensaje actual |
+
+### 17.4 Estados de Archivos (Iconos)
+
+| Icono | Estado | Descripción |
+|-------|--------|-------------|
+| `M` | Modified | Archivo modificado |
+| `A` | Added | Archivo nuevo |
+| `D` | Deleted | Archivo eliminado |
+| `R` | Renamed | Archivo renombrado |
+| `U` | Untracked | Archivo sin seguimiento |
+
+### 17.5 Nuevos Mensajes Webview
+
+```typescript
+// Mensajes adicionales: Webview → Extension Host
+type WebviewToExtensionMessage =
+  | { command: 'stageAll' }
+  | { command: 'unstageAll' }
+  | { command: 'discardAll' }
+  | { command: 'commit'; message: string }
+  | { command: 'refreshChanges' };
+
+// Mensajes adicionales: Extension Host → Webview
+type ExtensionToWebviewMessage =
+  | { type: 'changesUpdated'; changes: FileChange[]; staged: FileChange[] }
+  | { type: 'commitSuccess' }
+  | { type: 'commitError'; error: string };
+
+type FileChange = {
+  path: string;
+  fileName: string;
+  status: 'M' | 'A' | 'D' | 'R' | 'U';
+};
+```
+
+### 17.6 Extensiones al GitService
+
+```typescript
+// src/services/gitService.ts - Métodos adicionales
+
+export class GitService {
+  // ... métodos existentes ...
+
+  /** Obtiene lista de archivos con cambios (no staged) */
+  async getChanges(): Promise<FileChange[]> {
+    const repo = this.getRepository();
+    if (!repo) return [];
+
+    return repo.state.workingTreeChanges.map(change => ({
+      path: change.uri.fsPath,
+      fileName: path.basename(change.uri.fsPath),
+      status: this.mapStatus(change.status),
+    }));
+  }
+
+  /** Obtiene lista de archivos staged */
+  async getStagedChanges(): Promise<FileChange[]> {
+    const repo = this.getRepository();
+    if (!repo) return [];
+
+    return repo.state.indexChanges.map(change => ({
+      path: change.uri.fsPath,
+      fileName: path.basename(change.uri.fsPath),
+      status: this.mapStatus(change.status),
+    }));
+  }
+
+  /** Stage todos los cambios */
+  async stageAll(): Promise<void> {
+    const repo = this.getRepository();
+    if (!repo) throw new Error('No repository found');
+
+    const uris = repo.state.workingTreeChanges.map(c => c.uri);
+    await repo.add(uris);
+  }
+
+  /** Unstage todos los cambios */
+  async unstageAll(): Promise<void> {
+    const repo = this.getRepository();
+    if (!repo) throw new Error('No repository found');
+
+    const uris = repo.state.indexChanges.map(c => c.uri);
+    await repo.revert(uris);
+  }
+
+  /** Descartar todos los cambios (working tree) */
+  async discardAll(): Promise<void> {
+    const repo = this.getRepository();
+    if (!repo) throw new Error('No repository found');
+
+    const uris = repo.state.workingTreeChanges.map(c => c.uri);
+    await repo.clean(uris);
+  }
+
+  /** Ejecutar commit */
+  async commit(message: string): Promise<void> {
+    const repo = this.getRepository();
+    if (!repo) throw new Error('No repository found');
+
+    if (!message.trim()) {
+      throw new Error('Commit message cannot be empty');
+    }
+
+    await repo.commit(message);
+  }
+
+  /** Suscribirse a cambios del repositorio */
+  onDidChangeRepository(callback: () => void): vscode.Disposable {
+    const repo = this.getRepository();
+    if (!repo) {
+      return { dispose: () => {} };
+    }
+
+    return repo.state.onDidChange(callback);
+  }
+
+  private mapStatus(status: number): FileChange['status'] {
+    // VS Code Git Status enum mapping
+    switch (status) {
+      case 5: return 'M';  // MODIFIED
+      case 1: return 'A';  // INDEX_ADDED
+      case 6: return 'D';  // DELETED
+      case 3: return 'R';  // INDEX_RENAMED
+      case 7: return 'U';  // UNTRACKED
+      default: return 'M';
+    }
+  }
+}
+```
+
+### 17.7 Actualización del SidebarProvider
+
+```typescript
+// Añadir en resolveWebviewView()
+private setupRepositoryWatcher(): void {
+  const disposable = this.gitService.onDidChangeRepository(() => {
+    this.sendChangesUpdate();
+  });
+
+  this.disposables.push(disposable);
+}
+
+private async sendChangesUpdate(): Promise<void> {
+  const changes = await this.gitService.getChanges();
+  const staged = await this.gitService.getStagedChanges();
+
+  this.postMessage({
+    type: 'changesUpdated',
+    changes,
+    staged,
+  });
+}
+
+// Añadir handlers para nuevos comandos
+private async handleMessage(message: WebviewToExtensionMessage): Promise<void> {
+  switch (message.command) {
+    // ... casos existentes ...
+
+    case 'stageAll':
+      await this.gitService.stageAll();
+      await this.sendChangesUpdate();
+      break;
+
+    case 'unstageAll':
+      await this.gitService.unstageAll();
+      await this.sendChangesUpdate();
+      break;
+
+    case 'discardAll':
+      const confirm = await vscode.window.showWarningMessage(
+        'Discard all changes? This cannot be undone.',
+        { modal: true },
+        'Discard'
+      );
+      if (confirm === 'Discard') {
+        await this.gitService.discardAll();
+        await this.sendChangesUpdate();
+      }
+      break;
+
+    case 'commit':
+      try {
+        await this.gitService.commit(message.message);
+        this.postMessage({ type: 'commitSuccess' });
+        vscode.window.showInformationMessage('Commit created successfully!');
+        await this.sendChangesUpdate();
+      } catch (error) {
+        this.postMessage({
+          type: 'commitError',
+          error: (error as Error).message,
+        });
+      }
+      break;
+
+    case 'refreshChanges':
+      await this.sendChangesUpdate();
+      break;
+  }
+}
+```
+
+### 17.8 Estilos CSS Adicionales
+
+```css
+/* Sección de cambios */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--vscode-foreground);
+}
+
+.counter {
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.file-list {
+  max-height: 150px;
+  overflow-y: auto;
+  margin: 4px 0;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: var(--vscode-editor-font-family);
+}
+
+.file-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.file-status {
+  width: 16px;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.file-status.modified { color: var(--vscode-gitDecoration-modifiedResourceForeground); }
+.file-status.added { color: var(--vscode-gitDecoration-addedResourceForeground); }
+.file-status.deleted { color: var(--vscode-gitDecoration-deletedResourceForeground); }
+.file-status.untracked { color: var(--vscode-gitDecoration-untrackedResourceForeground); }
+
+.file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.button-row button {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.btn-danger {
+  background: var(--vscode-inputValidation-errorBackground);
+  color: var(--vscode-errorForeground);
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+.divider {
+  height: 1px;
+  background: var(--vscode-panel-border);
+  margin: 12px 0;
+}
+
+.commit-input {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: 12px;
+  resize: vertical;
+}
+
+.commit-input:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+}
+
+.btn-commit {
+  margin-top: 12px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 12px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+  font-style: italic;
+}
+```
+
+### 17.9 Plan de Implementación v0.2.0
+
+#### Fase 1: Extensión GitService
+
+- [ ] Implementar `getChanges()` y `getStagedChanges()`
+- [ ] Implementar `stageAll()`, `unstageAll()`, `discardAll()`
+- [ ] Implementar `commit(message)`
+- [ ] Implementar `onDidChangeRepository()` para reactividad
+- [ ] Tests unitarios para nuevos métodos
+
+#### Fase 2: UI del Panel de Cambios
+
+- [ ] Añadir sección "Changes" al HTML
+- [ ] Añadir sección "Staged Changes" al HTML
+- [ ] Implementar rendering de lista de archivos
+- [ ] Añadir iconos de estado por tipo de cambio
+- [ ] Añadir counters en headers de sección
+
+#### Fase 3: Acciones de Git
+
+- [ ] Implementar handler `stageAll`
+- [ ] Implementar handler `unstageAll`
+- [ ] Implementar handler `discardAll` con confirmación
+- [ ] Conectar botones a handlers
+
+#### Fase 4: Commit Flow
+
+- [ ] Añadir textarea editable para mensaje
+- [ ] Conectar "Generate" para llenar el textarea
+- [ ] Implementar botón "Commit"
+- [ ] Feedback visual de éxito/error
+- [ ] Limpiar UI post-commit
+
+#### Fase 5: Reactividad
+
+- [ ] Suscribirse a cambios del repositorio
+- [ ] Auto-refresh de listas al detectar cambios
+- [ ] Debounce para evitar actualizaciones excesivas
+- [ ] Testing de flujo completo
+
+### 17.10 Consideraciones de UX
+
+| Aspecto | Decisión |
+|---------|----------|
+| **Confirmación Discard** | Modal de confirmación obligatorio |
+| **Commit vacío** | Deshabilitar botón si no hay mensaje |
+| **Sin staged changes** | Deshabilitar botón Commit, mostrar mensaje |
+| **Scroll en listas** | Max-height con overflow para listas largas |
+| **Feedback** | Toast notifications para acciones exitosas |
+| **Loading states** | Spinner en botones durante operaciones |
+
+### 17.11 Riesgos Específicos
+
+| Riesgo | Mitigación |
+|--------|------------|
+| Pérdida de cambios con Discard | Confirmación modal obligatoria |
+| Conflictos durante commit | Mostrar error claro, sugerir resolver |
+| Performance con muchos archivos | Virtualización de listas si >100 archivos |
+| Desync entre UI y estado real | Watcher de repositorio + refresh manual |
