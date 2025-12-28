@@ -1,10 +1,16 @@
 /* Base Layout */
+* {
+  box-sizing: border-box;
+}
+
 body {
   padding: 10px;
   color: var(--vscode-foreground);
   font-family: var(--vscode-font-family);
   font-size: var(--vscode-font-size);
   background-color: var(--vscode-sideBar-background);
+  margin: 0;
+  overflow-x: hidden;
 }
 
 .hidden {
