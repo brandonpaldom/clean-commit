@@ -274,7 +274,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}' https://unpkg.com;">
       <link href="${styleUri}" rel="stylesheet">
       <title>CleanCommit</title>
     </head>
@@ -283,18 +283,24 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <p class="info">Set your Gemini API key to get started.</p>
         <button class="primary" id="btn-set-key">Set API Key</button>
       </div>
-
+ 
       <div id="main-content" class="hidden">
         <div class="section">
           <div class="section-header">
             <span>Commit Message</span>
-            <button class="icon-button" id="btn-refresh" title="Refresh changes">🔄</button>
+            <button class="icon-button" id="btn-refresh" title="Refresh changes">
+              <i data-lucide="refresh-cw"></i>
+            </button>
           </div>
           <textarea id="commit-message" class="commit-input" placeholder="Enter commit message or generate..."></textarea>
           
           <div class="button-row">
-            <button class="primary" id="btn-generate" title="Generate with AI">✨ Generate</button>
-            <button class="primary btn-commit" id="btn-commit" title="Commit staged changes">🚀 Commit</button>
+            <button class="primary" id="btn-generate" title="Generate with AI">
+              <i data-lucide="sparkles"></i> Generate
+            </button>
+            <button class="primary btn-commit" id="btn-commit" title="Commit staged changes">
+              <i data-lucide="rocket"></i> Commit
+            </button>
           </div>
         </div>
 
@@ -337,10 +343,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
       <div class="footer">
         <button class="icon-button" id="btn-settings" title="Open Settings">
-           ⚙️ Settings
+           <i data-lucide="settings"></i> Settings
         </button>
       </div>
 
+      <script nonce="${nonce}" src="https://unpkg.com/lucide@latest"></script>
       <script nonce="${nonce}" src="${scriptUri}"></script>
     </body>
     </html>`;

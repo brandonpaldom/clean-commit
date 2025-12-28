@@ -40,6 +40,9 @@ function updateUI() {
   if (state.error) {
     elements.error.textContent = state.error;
   }
+  
+  // Refresh icons for static elements if needed
+  lucide.createIcons();
 }
 
 function createFileItem(file, isStaged) {
@@ -47,9 +50,9 @@ function createFileItem(file, isStaged) {
   div.className = 'file-item';
   
   const actionsHtml = isStaged 
-    ? `<button class="btn-unstage-file" title="Unstage file">Unstage</button>`
-    : `<button class="btn-stage-file" title="Stage file">Stage</button>
-       <button class="btn-discard-file" title="Discard changes">Discard</button>`;
+    ? `<button class="btn-unstage-file" title="Unstage file"><i data-lucide="minus-circle"></i></button>`
+    : `<button class="btn-stage-file" title="Stage file"><i data-lucide="plus-circle"></i></button>
+       <button class="btn-discard-file" title="Discard changes"><i data-lucide="trash-2"></i></button>`;
 
   div.innerHTML = `
     <span class="file-status ${file.status}" title="${getStatusLabel(file.status)}">${file.status}</span>
@@ -111,6 +114,9 @@ function renderFileList(container, files, emptyText, isStaged) {
   files.forEach(file => {
     container.appendChild(createFileItem(file, isStaged));
   });
+  
+  // Initialize newly added icons
+  lucide.createIcons();
 }
 
 // Event Listeners

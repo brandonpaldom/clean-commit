@@ -241,15 +241,38 @@ button:disabled {
   justify-content: flex-end;
 }
 
-.icon-button {
-  background: none;
-  border: none;
-  color: var(--vscode-foreground);
-  cursor: pointer;
-  padding: 2px 4px;
-  opacity: 0.7;
+/* Lucide Icons Styling */
+.lucide {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  stroke-width: 2px;
 }
 
-.icon-button:hover {
-  opacity: 1;
+button .lucide {
+  margin-right: 4px;
+}
+
+button.icon-button .lucide {
+  margin-right: 0;
+}
+
+.file-status {
+  width: 16px;
+  margin-right: 8px;
+  font-weight: 800;
+  font-size: 11px;
+  text-align: center;
+}
+
+.file-actions button {
+  padding: 4px;
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+}
+
+.file-actions button .lucide {
+  margin-right: 0;
+  width: 12px;
+  height: 12px;
 }
