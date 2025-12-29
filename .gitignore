@@ -3,4 +3,4 @@ dist
 node_modules
 .vscode-test/
 *.vsix
-implementation-plan.md
+./implementation-plan.md
