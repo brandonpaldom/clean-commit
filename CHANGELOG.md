@@ -2,6 +2,12 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [0.2.1] - 2025-12-28
+
+### Fixed
+- **Production UI Assets**: Fixed an issue where CSS and JS files were missing in the published extension due to `.vscodeignore` rules.
+- **Icon Rendering**: Improved Content Security Policy (CSP) to ensure Lucide icons and styles load correctly in production.
+
 ## [0.2.0] - 2025-12-28
 
 ### Added

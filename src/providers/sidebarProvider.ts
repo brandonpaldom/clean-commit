@@ -265,8 +265,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private async getHtmlContent(webview: vscode.Webview): Promise<string> {
-    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.css'));
-    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.js'));
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', 'sidebar.css'));
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', 'sidebar.js'));
     const nonce = this.getNonce();
 
     return `<!DOCTYPE html>
@@ -274,7 +274,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}' https://unpkg.com;">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' https://unpkg.com; img-src ${webview.cspSource} https:;">
       <link href="${styleUri}" rel="stylesheet">
       <title>CleanCommit</title>
     </head>
