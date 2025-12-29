@@ -1,5 +1,5 @@
 {
-  "name": "cleancommit",
+  "name": "clean-commit",
   "displayName": "CleanCommit",
   "description": "AI-powered commit message generator using Conventional Commits",
   "version": "0.2.0",
