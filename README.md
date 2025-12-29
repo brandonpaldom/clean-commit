@@ -1,71 +1,143 @@
-# cleancommit README
+# CleanCommit
 
-This is the README for your extension "cleancommit". After writing up a brief description, we recommend including the following sections.
+AI-powered commit message generator that follows the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+Generate clear, consistent, and meaningful commit messages in seconds.
+
+![CleanCommit Demo](resources/demo.gif)
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **AI-Generated Messages**: Automatically generates commit messages based on your staged changes
+- **Conventional Commits**: All messages follow the standard format (`feat`, `fix`, `docs`, `refactor`, etc.)
+- **Git Integration**: View, stage, unstage, and discard changes directly from the sidebar
+- **One-Click Commit**: Commit your changes without leaving the panel
+- **Multi-Language**: Generate messages in English or Spanish
+- **Cross-Compatible**: Works with VS Code, Cursor, Windsurf, VSCodium, and other VS Code-based editors
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+1. Open your editor's Extensions view (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+2. Search for **CleanCommit**
+3. Click **Install**
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Or install from the command line:
+
+```bash
+code --install-extension cleancommit-dev.clean-commit
+```
+
+## Getting Started
+
+### 1. Get a Gemini API Key
+
+CleanCommit uses Google Gemini to generate commit messages. Get your free API key:
+
+1. Visit [Google AI Studio](https://aistudio.google.com/apikey)
+2. Sign in with your Google account
+3. Click **Create API Key**
+4. Copy your new API key
+
+### 2. Configure the Extension
+
+1. Open the CleanCommit panel from the sidebar (look for the CleanCommit icon)
+2. Click **Set API Key**
+3. Paste your Gemini API key
+4. You're ready to go!
+
+> Your API key is stored securely in your editor's secret storage and never leaves your machine except to communicate with Google's API.
+
+## Usage
+
+### Generate a Commit Message
+
+1. Stage your changes (using Git or the CleanCommit panel)
+2. Click **Generate** in the CleanCommit sidebar
+3. Review the generated message
+4. Click **Commit** to create the commit, or **Copy** to use it elsewhere
+
+### Manage Changes
+
+The CleanCommit panel shows your repository status:
+
+| Section | Description |
+|---------|-------------|
+| **Changes** | Files with uncommitted modifications |
+| **Staged Changes** | Files ready to be committed |
+
+Available actions:
+- **Stage All**: Add all changes to staging
+- **Unstage All**: Remove all files from staging
+- **Discard All**: Revert all changes (requires confirmation)
+- **Commit**: Create a commit with the current message
+
+## Settings
+
+Configure CleanCommit in your editor settings (`Ctrl+,` / `Cmd+,`):
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `cleancommit.language` | Language for commit messages (`en` or `es`) | `en` |
+| `cleancommit.includeBody` | Include detailed body in commit message | `false` |
+| `cleancommit.maxDiffSize` | Maximum diff size sent for analysis (characters) | `4000` |
+
+## Commands
+
+Access these commands via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
+
+| Command | Description |
+|---------|-------------|
+| `CleanCommit: Generate Commit Message` | Generate a message for staged changes |
+| `CleanCommit: Set Gemini API Key` | Configure or update your API key |
+
+## Compatibility
+
+CleanCommit is designed to work with:
+
+- VS Code 1.90.0+
+- Cursor
+- Windsurf
+- VSCodium
+- Other VS Code-based editors
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Git must be installed and available in your PATH
+- A Google Gemini API key (free tier available)
 
-## Extension Settings
+## Privacy
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+- Your API key is stored locally in your editor's secure storage
+- Only your staged diff content is sent to Google Gemini for analysis
+- No telemetry or usage data is collected
 
-For example:
+## Troubleshooting
 
-This extension contributes the following settings:
+### "No staged changes found"
+Make sure you have staged some files before generating a commit message. Use `git add` or the **Stage All** button.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+### "API key not set"
+Click **Set API Key** in the sidebar or run the command `CleanCommit: Set Gemini API Key`.
 
-## Known Issues
+### "Failed to generate message"
+- Check your internet connection
+- Verify your API key is valid
+- If the diff is very large, try staging fewer files
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+### Extension not appearing in sidebar
+Restart your editor. If the issue persists, check that the Git extension is enabled.
 
-## Release Notes
+## Feedback & Support
 
-Users appreciate release notes as you update your extension.
+Found a bug or have a feature request?
 
-### 1.0.0
+- [Open an issue](https://github.com/cleancommit-dev/clean-commit/issues)
+- [View source code](https://github.com/cleancommit-dev/clean-commit)
 
-Initial release of ...
+## License
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Happy committing!**
