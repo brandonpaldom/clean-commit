@@ -2,7 +2,7 @@
   "name": "clean-commit",
   "displayName": "CleanCommit",
   "description": "AI-powered commit message generator using Conventional Commits",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "publisher": "brandonpalmeros",
   "icon": "resources/icon.png",
   "license": "MIT",
