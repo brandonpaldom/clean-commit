@@ -5,7 +5,43 @@ export type ErrorCode =
   | 'API_ERROR'
   | 'NETWORK_ERROR'
   | 'RATE_LIMIT'
+  | 'INVALID_PROVIDER'
+  | 'PROVIDER_NOT_CONFIGURED'
   | 'UNKNOWN';
+
+// AI Provider Types
+export type AIProviderType = 'gemini' | 'openai' | 'groq' | 'openrouter';
+
+export interface AIProvider {
+  readonly name: string;
+  readonly model: string;
+  generateCommitMessage(diff: string, options: GenerateOptions): Promise<string>;
+}
+
+export interface ProviderConfig {
+  type: AIProviderType;
+  apiKey: string;
+}
+
+export class AIProviderError extends Error {
+  constructor(
+    message: string,
+    public code: ErrorCode,
+    public provider: AIProviderType,
+    public retryable: boolean = false
+  ) {
+    super(message);
+    this.name = 'AIProviderError';
+  }
+}
+
+// Provider metadata for UI
+export const PROVIDER_INFO: Record<AIProviderType, { label: string; model: string; placeholder: string }> = {
+  gemini: { label: 'Google Gemini', model: 'gemini-2.5-flash', placeholder: 'AIza...' },
+  openai: { label: 'OpenAI', model: 'gpt-4o-mini', placeholder: 'sk-...' },
+  groq: { label: 'Groq', model: 'llama-3.3-70b-versatile', placeholder: 'gsk_...' },
+  openrouter: { label: 'OpenRouter', model: 'google/gemini-2.0-flash-001', placeholder: 'sk-or-...' },
+};
 
 export type FileChangeStatus = 'M' | 'A' | 'D' | 'R' | 'U';
 
@@ -46,6 +82,8 @@ export type SidebarState = {
   isLoading: boolean;
   generatedMessage: string | null;
   error: string | null;
+  currentProvider: AIProviderType;
+  providerLabel: string;
 };
 
 export interface GenerateOptions {

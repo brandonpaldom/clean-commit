@@ -1,12 +1,15 @@
 import * as vscode from 'vscode';
 import { GitService } from '../services/gitService';
-import { generateCommitMessage } from '../services/geminiService';
+import { createProvider, PROVIDER_SECRET_KEYS } from '../services/providerFactory';
 import { truncateDiff } from '../prompts/conventionalCommit';
 import type { 
   WebviewToExtensionMessage, 
   SidebarState, 
-  ExtensionToWebviewMessage 
+  ExtensionToWebviewMessage,
+  AIProviderType,
+  AIProviderError
 } from '../types';
+import { PROVIDER_INFO } from '../types';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView;
@@ -34,6 +37,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     
     // Setup Git repository watcher
     this.setupRepositoryWatcher();
+    
+    // Setup configuration watcher (for provider changes)
+    this.setupConfigurationWatcher();
 
     webviewView.webview.onDidReceiveMessage((message: WebviewToExtensionMessage) => {
       this.handleMessage(message);
@@ -48,6 +54,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private setupRepositoryWatcher(): void {
     const disposable = this.gitService.onDidChangeRepository(() => {
       this.sendChangesUpdate();
+    });
+
+    this.disposables.push(disposable);
+  }
+
+  private setupConfigurationWatcher(): void {
+    const disposable = vscode.workspace.onDidChangeConfiguration((e) => {
+      // Re-check API key status when provider changes
+      if (e.affectsConfiguration('cleancommit.provider')) {
+        this.sendInitialState();
+      }
     });
 
     this.disposables.push(disposable);
@@ -194,9 +211,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this.postMessage({ type: 'loading', isLoading: true });
 
     try {
-      const apiKey = await this.secrets.get('cleancommit.apiKey');
+      const config = vscode.workspace.getConfiguration('cleancommit');
+      const providerType = config.get<AIProviderType>('provider', 'gemini');
+      const secretKey = PROVIDER_SECRET_KEYS[providerType];
+      const apiKey = await this.secrets.get(secretKey);
+      
       if (!apiKey) {
-        this.postMessage({ type: 'error', error: 'API key not set', code: 'NO_API_KEY' });
+        const providerLabel = PROVIDER_INFO[providerType].label;
+        this.postMessage({ 
+          type: 'error', 
+          error: `API key not set for ${providerLabel}`, 
+          code: 'NO_API_KEY' 
+        });
         return;
       }
 
@@ -206,25 +232,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         return;
       }
 
-      const config = vscode.workspace.getConfiguration('cleancommit');
       const maxDiffSize = config.get('maxDiffSize', 4000);
       const language = config.get('language', 'en');
       const includeBody = config.get('includeBody', false);
 
       const truncatedDiff = truncateDiff(diff, maxDiffSize);
       
-      const message = await generateCommitMessage(truncatedDiff, apiKey, {
+      const provider = createProvider(providerType, apiKey);
+      const message = await provider.generateCommitMessage(truncatedDiff, {
         language,
         includeBody,
         maxDiffSize
       });
 
       this.postMessage({ type: 'commitGenerated', message });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const aiError = error as AIProviderError;
       this.postMessage({ 
         type: 'error', 
-        error: error.message || 'Unknown error', 
-        code: error.code || 'UNKNOWN' 
+        error: aiError.message || 'Unknown error', 
+        code: aiError.code || 'UNKNOWN' 
       });
     } finally {
       this.postMessage({ type: 'loading', isLoading: false });
@@ -232,21 +259,30 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private async handleSetApiKey(): Promise<void> {
+    const config = vscode.workspace.getConfiguration('cleancommit');
+    const providerType = config.get<AIProviderType>('provider', 'gemini');
+    const providerInfo = PROVIDER_INFO[providerType];
+    const secretKey = PROVIDER_SECRET_KEYS[providerType];
+
     const apiKey = await vscode.window.showInputBox({
-      prompt: 'Enter your Gemini API Key',
+      prompt: `Enter your ${providerInfo.label} API Key`,
       password: true,
-      placeHolder: 'AIza...',
+      placeHolder: providerInfo.placeholder,
     });
 
     if (apiKey) {
-      await this.secrets.store('cleancommit.apiKey', apiKey);
-      vscode.window.showInformationMessage('API key saved successfully!');
+      await this.secrets.store(secretKey, apiKey);
+      vscode.window.showInformationMessage(`${providerInfo.label} API key saved successfully!`);
       await this.sendInitialState();
     }
   }
 
   private async sendInitialState(): Promise<void> {
-    const apiKey = await this.secrets.get('cleancommit.apiKey');
+    const config = vscode.workspace.getConfiguration('cleancommit');
+    const providerType = config.get<AIProviderType>('provider', 'gemini');
+    const providerInfo = PROVIDER_INFO[providerType];
+    const secretKey = PROVIDER_SECRET_KEYS[providerType];
+    const apiKey = await this.secrets.get(secretKey);
     const diff = await this.gitService.getStagedDiff();
 
     const state: SidebarState = {
@@ -255,6 +291,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       isLoading: false,
       generatedMessage: null,
       error: null,
+      currentProvider: providerType,
+      providerLabel: providerInfo.label,
     };
 
     this.postMessage({ type: 'setState', state });
@@ -280,7 +318,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     </head>
     <body>
       <div id="no-api-key" class="hidden">
-        <p class="info">Set your Gemini API key to get started.</p>
+        <p class="info" id="no-api-key-text">Set your API key to get started.</p>
+        <p class="info hint">You can change the AI provider in Settings.</p>
         <button class="primary" id="btn-set-key">Set API Key</button>
       </div>
  
@@ -300,6 +339,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             </button>
             <button class="primary btn-commit" id="btn-commit" title="Commit staged changes">
               <i data-lucide="rocket"></i> Commit
+            </button>
+          </div>
+          
+          <div class="provider-info">
+            <span class="provider-label">Provider:</span>
+            <span class="provider-badge" id="provider-badge">Loading...</span>
+            <button class="link-button" id="btn-change-key" title="Change API Key">
+              <i data-lucide="key"></i>
             </button>
           </div>
         </div>

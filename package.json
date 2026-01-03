@@ -26,7 +26,12 @@
     "commit",
     "ai",
     "conventional-commits",
-    "gemini"
+    "gemini",
+    "openai",
+    "groq",
+    "openrouter",
+    "gpt",
+    "llama"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -61,13 +66,30 @@
       },
       {
         "command": "cleancommit.setApiKey",
-        "title": "Set Gemini API Key",
+        "title": "Set API Key",
         "category": "CleanCommit"
       }
     ],
     "configuration": {
       "title": "CleanCommit",
       "properties": {
+        "cleancommit.provider": {
+          "type": "string",
+          "default": "gemini",
+          "enum": [
+            "gemini",
+            "openai",
+            "groq",
+            "openrouter"
+          ],
+          "enumDescriptions": [
+            "Google Gemini (gemini-2.5-flash) - Fast & affordable",
+            "OpenAI (gpt-4o-mini) - High quality, low cost",
+            "Groq (llama-3.3-70b) - Ultra fast, free tier available",
+            "OpenRouter (multi-model) - Access 100+ models with one API key"
+          ],
+          "description": "AI provider for commit message generation"
+        },
         "cleancommit.language": {
           "type": "string",
           "default": "en",
@@ -111,7 +133,9 @@
     "test": "vscode-test"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0"
+    "@google/generative-ai": "^0.21.0",
+    "groq-sdk": "^0.8.0",
+    "openai": "^4.77.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.90.0",

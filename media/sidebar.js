@@ -2,8 +2,10 @@ const vscode = acquireVsCodeApi();
 
 const elements = {
   noApiKey: document.getElementById('no-api-key'),
+  noApiKeyText: document.getElementById('no-api-key-text'),
   mainContent: document.getElementById('main-content'),
   btnSetKey: document.getElementById('btn-set-key'),
+  btnChangeKey: document.getElementById('btn-change-key'),
   btnGenerate: document.getElementById('btn-generate'),
   btnCommit: document.getElementById('btn-commit'),
   btnRefresh: document.getElementById('btn-refresh'),
@@ -18,6 +20,7 @@ const elements = {
   stagedList: document.getElementById('staged-list'),
   changesCount: document.getElementById('changes-count'),
   stagedCount: document.getElementById('staged-count'),
+  providerBadge: document.getElementById('provider-badge'),
 };
 
 let state = {
@@ -25,11 +28,23 @@ let state = {
   hasStagedChanges: false,
   isLoading: false,
   error: null,
+  currentProvider: 'gemini',
+  providerLabel: 'Google Gemini',
 };
 
 function updateUI() {
   elements.noApiKey.classList.toggle('hidden', state.hasApiKey);
   elements.mainContent.classList.toggle('hidden', !state.hasApiKey);
+
+  // Update the no-api-key message with current provider
+  if (elements.noApiKeyText) {
+    elements.noApiKeyText.textContent = `Set your ${state.providerLabel} API key to get started.`;
+  }
+
+  // Update provider badge
+  if (elements.providerBadge) {
+    elements.providerBadge.textContent = state.providerLabel;
+  }
 
   elements.btnGenerate.disabled = !state.hasStagedChanges || state.isLoading;
   elements.btnCommit.disabled = !state.hasStagedChanges || state.isLoading || !elements.commitMessage.value.trim();
@@ -121,6 +136,10 @@ function renderFileList(container, files, emptyText, isStaged) {
 
 // Event Listeners
 elements.btnSetKey.addEventListener('click', () => {
+  vscode.postMessage({ command: 'setApiKey' });
+});
+
+elements.btnChangeKey?.addEventListener('click', () => {
   vscode.postMessage({ command: 'setApiKey' });
 });
 
