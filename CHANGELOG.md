@@ -2,6 +2,28 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.0.0] - 2026-01-03
+
+### Added
+- **Multi-Provider Support**: Choose between multiple AI providers for commit message generation:
+  - **Google Gemini** (default) - `gemini-2.5-flash`
+  - **OpenAI** - `gpt-4o-mini`
+  - **Groq** - `llama-3.3-70b-versatile` (free tier available)
+  - **OpenRouter** - `google/gemini-2.0-flash-001` (100+ models available)
+- **Provider Selector**: New setting `cleancommit.provider` to choose your preferred AI provider.
+- **Independent API Keys**: Each provider has its own API key stored securely. Switch providers without losing your keys.
+- **Dynamic UI**: Sidebar now shows the active provider and allows changing API keys on the fly.
+- **Auto-refresh on Provider Change**: Sidebar automatically updates when you change providers in settings.
+
+### Changed
+- Refactored AI service architecture to support multiple providers via a unified interface.
+- Improved error messages with provider-specific details (rate limits, insufficient credits, etc.).
+
+## [0.2.2] - 2025-12-29
+
+### Changed
+- **Updated Extension Icons**: Refreshed icons for better visibility and consistency across themes.
+
 ## [0.2.1] - 2025-12-28
 
 ### Fixed
