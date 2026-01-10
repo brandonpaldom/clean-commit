@@ -4,7 +4,7 @@ AI-powered commit message generator that follows the [Conventional Commits](http
 
 Generate clear, consistent, and meaningful commit messages in seconds using your favorite AI provider.
 
-![CleanCommit Demo](https://github.com/user-attachments/assets/2d45f122-bd74-4c79-91f4-76e3746bdf6d)
+![CleanCommit Demo](https://res.cloudinary.com/dlomynswh/image/upload/v1768015039/clean-commit/Captura_de_pantalla_2026-01-09_a_la_s_9.16.22_p.m..png)
 
 ## Features
 
