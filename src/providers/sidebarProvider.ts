@@ -305,6 +305,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private async getHtmlContent(webview: vscode.Webview): Promise<string> {
     const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', 'sidebar.css'));
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', 'sidebar.js'));
+    const lucideUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'media', 'lucide.min.js'));
     const nonce = this.getNonce();
 
     return `<!DOCTYPE html>
@@ -312,7 +313,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' https://unpkg.com; img-src ${webview.cspSource} https:;">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src ${webview.cspSource} https:;">
       <link href="${styleUri}" rel="stylesheet">
       <title>CleanCommit</title>
     </head>
@@ -394,7 +395,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         </button>
       </div>
 
-      <script nonce="${nonce}" src="https://unpkg.com/lucide@latest"></script>
+      <script nonce="${nonce}" src="${lucideUri}"></script>
       <script nonce="${nonce}" src="${scriptUri}"></script>
     </body>
     </html>`;
