@@ -7,6 +7,7 @@ const elements = {
   btnSetKey: document.getElementById('btn-set-key'),
   btnChangeKey: document.getElementById('btn-change-key'),
   btnGenerate: document.getElementById('btn-generate'),
+  btnRegenerate: document.getElementById('btn-regenerate'),
   btnCommit: document.getElementById('btn-commit'),
   btnRefresh: document.getElementById('btn-refresh'),
   btnStageAll: document.getElementById('btn-stage-all'),
@@ -27,6 +28,7 @@ let state = {
   hasApiKey: false,
   hasStagedChanges: false,
   isLoading: false,
+  hasGenerated: false,
   error: null,
   currentProvider: 'gemini',
   providerLabel: 'Google Gemini',
@@ -47,6 +49,8 @@ function updateUI() {
   }
 
   elements.btnGenerate.disabled = !state.hasStagedChanges || state.isLoading;
+  elements.btnRegenerate.classList.toggle('hidden', !state.hasGenerated);
+  elements.btnRegenerate.disabled = !state.hasStagedChanges || state.isLoading;
   elements.btnCommit.disabled = !state.hasStagedChanges || state.isLoading || !elements.commitMessage.value.trim();
 
   elements.loading.classList.toggle('hidden', !state.isLoading);
@@ -149,6 +153,12 @@ elements.btnGenerate.addEventListener('click', () => {
   vscode.postMessage({ command: 'generateCommit' });
 });
 
+elements.btnRegenerate.addEventListener('click', () => {
+  state.error = null;
+  updateUI();
+  vscode.postMessage({ command: 'generateCommit' });
+});
+
 elements.btnCommit.addEventListener('click', () => {
   const message = elements.commitMessage.value.trim();
   if (message) {
@@ -198,6 +208,7 @@ window.addEventListener('message', (event) => {
 
     case 'commitGenerated':
       elements.commitMessage.value = message.message;
+      state.hasGenerated = true;
       state.error = null;
       break;
 
@@ -211,6 +222,7 @@ window.addEventListener('message', (event) => {
 
     case 'commitSuccess':
       elements.commitMessage.value = '';
+      state.hasGenerated = false;
       state.error = null;
       break;
 

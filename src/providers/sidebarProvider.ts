@@ -338,6 +338,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <button class="primary" id="btn-generate" title="Generate with AI">
               <i data-lucide="sparkles"></i> Generate
             </button>
+            <button class="secondary hidden" id="btn-regenerate" title="Regenerate message">
+              <i data-lucide="refresh-cw"></i> Regenerate
+            </button>
             <button class="primary btn-commit" id="btn-commit" title="Commit staged changes">
               <i data-lucide="rocket"></i> Commit
             </button>
