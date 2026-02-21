@@ -17,7 +17,7 @@ export class OpenAIProvider implements AIProvider {
         model: this.model,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: USER_PROMPT_TEMPLATE(diff, options.language) }
+          { role: 'user', content: USER_PROMPT_TEMPLATE(diff, options.language, options.includeBody) }
         ],
         temperature: 0.3,
         max_tokens: 500,

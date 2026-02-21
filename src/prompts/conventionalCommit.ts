@@ -29,9 +29,10 @@ fix(api): handle null response from user endpoint
 refactor(utils): simplify date formatting logic
 `;
 
-export const USER_PROMPT_TEMPLATE = (diff: string, language: string) => `
+export const USER_PROMPT_TEMPLATE = (diff: string, language: string, includeBody: boolean) => `
 Analyze the following git diff and generate a commit message.
 Language: ${language === 'es' ? 'Spanish' : 'English'}
+${includeBody ? 'Include a detailed body explaining WHAT changed and WHY. Separate the subject from the body with a blank line.' : 'Generate ONLY the subject line, do NOT include a body.'}
 
 \`\`\`diff
 ${diff}

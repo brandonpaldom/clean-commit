@@ -26,7 +26,7 @@ export async function generateCommitMessage(
     const result = await model.generateContent({
       contents: [{
         role: 'user',
-        parts: [{ text: USER_PROMPT_TEMPLATE(diff, options.language) }]
+        parts: [{ text: USER_PROMPT_TEMPLATE(diff, options.language, options.includeBody) }]
       }],
       systemInstruction: SYSTEM_PROMPT,
     });
