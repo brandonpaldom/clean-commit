@@ -2,6 +2,18 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.0] - 2026-02-20
+
+### Added
+- **Regenerate Button**: New button to request a different AI-generated commit message after the initial generation.
+- **Offline Icons**: Lucide icons are now bundled locally instead of loaded from a CDN, enabling full offline support and improving load times.
+
+### Fixed
+- **Include Body Setting**: The `cleancommit.includeBody` setting was not being passed to the AI prompt, making the feature non-functional. The prompt now explicitly instructs the AI to include or omit the commit body.
+
+### Changed
+- **Tighter CSP**: Removed external CDN domain from Content Security Policy since icons are now served locally.
+
 ## [1.0.0] - 2026-01-03
 
 ### Added

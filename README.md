@@ -72,7 +72,7 @@ CleanCommit supports multiple AI providers. Choose one and get your API key:
 
 1. Stage your changes (using Git or the CleanCommit panel)
 2. Click **Generate** in the CleanCommit sidebar
-3. Review the generated message
+3. Review the generated message — click **Regenerate** if you want a different suggestion
 4. Click **Commit** to create the commit, or **Copy** to use it elsewhere
 
 ### Manage Changes
