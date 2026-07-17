@@ -1,10 +1,10 @@
 import Groq from 'groq-sdk';
 import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '../../prompts/conventionalCommit';
-import { AIProvider, AIProviderError, GenerateOptions } from '../../types';
+import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../../types';
 
 export class GroqProvider implements AIProvider {
   readonly name = 'Groq';
-  readonly model = 'llama-3.3-70b-versatile';
+  readonly model = PROVIDER_INFO.groq.model;
   private client: Groq;
 
   constructor(apiKey: string) {

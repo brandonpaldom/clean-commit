@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '../../prompts/conventionalCommit';
-import { AIProvider, AIProviderError, GenerateOptions } from '../../types';
+import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../../types';
 
 /**
  * OpenRouter provider - Access multiple AI models through a single API
@@ -9,7 +9,7 @@ import { AIProvider, AIProviderError, GenerateOptions } from '../../types';
  */
 export class OpenRouterProvider implements AIProvider {
   readonly name = 'OpenRouter';
-  readonly model = 'google/gemini-2.0-flash-001';
+  readonly model = PROVIDER_INFO.openrouter.model;
   private client: OpenAI;
 
   constructor(apiKey: string) {

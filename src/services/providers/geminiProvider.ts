@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '../../prompts/conventionalCommit';
-import { AIProvider, AIProviderError, GenerateOptions } from '../../types';
+import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../../types';
 
 export class GeminiProvider implements AIProvider {
   readonly name = 'Google Gemini';
-  readonly model = 'gemini-2.5-flash';
+  readonly model = PROVIDER_INFO.gemini.model;
 
   constructor(private readonly apiKey: string) {}
 

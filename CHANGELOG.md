@@ -2,6 +2,13 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.1] - 2026-07-17
+
+### Changed
+- Updated the recommended small model for every AI provider.
+- Replaced the retired OpenRouter Gemini 2.0 Flash model with `google/gemini-3.1-flash-lite`.
+- Centralized model identifiers so runtime and UI metadata stay in sync.
+
 ## [1.1.0] - 2026-02-20
 
 ### Added

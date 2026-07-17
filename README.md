@@ -20,10 +20,10 @@ Generate clear, consistent, and meaningful commit messages in seconds using your
 
 | Provider | Model | Pricing |
 |----------|-------|---------|
-| **Google Gemini** (default) | `gemini-2.5-flash` | Free tier available |
-| **OpenAI** | `gpt-4o-mini` | ~$0.15/1M tokens |
-| **Groq** | `llama-3.3-70b-versatile` | Free tier available |
-| **OpenRouter** | `google/gemini-2.0-flash-001` | Pay-as-you-go |
+| **Google Gemini** (default) | `gemini-3.1-flash-lite` | Free tier available |
+| **OpenAI** | `gpt-5.6-luna` | Pay-as-you-go |
+| **Groq** | `openai/gpt-oss-20b` | Free tier available |
+| **OpenRouter** | `google/gemini-3.1-flash-lite` | Pay-as-you-go |
 
 ## Installation
 

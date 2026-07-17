@@ -1,10 +1,10 @@
 import OpenAI from 'openai';
 import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '../../prompts/conventionalCommit';
-import { AIProvider, AIProviderError, GenerateOptions } from '../../types';
+import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../../types';
 
 export class OpenAIProvider implements AIProvider {
   readonly name = 'OpenAI';
-  readonly model = 'gpt-4o-mini';
+  readonly model = PROVIDER_INFO.openai.model;
   private client: OpenAI;
 
   constructor(apiKey: string) {
@@ -19,8 +19,7 @@ export class OpenAIProvider implements AIProvider {
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: USER_PROMPT_TEMPLATE(diff, options.language, options.includeBody) }
         ],
-        temperature: 0.3,
-        max_tokens: 500,
+        max_completion_tokens: 500,
       });
 
       const text = completion.choices[0]?.message?.content?.trim() || '';

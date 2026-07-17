@@ -37,10 +37,10 @@ export class AIProviderError extends Error {
 
 // Provider metadata for UI
 export const PROVIDER_INFO: Record<AIProviderType, { label: string; model: string; placeholder: string }> = {
-  gemini: { label: 'Google Gemini', model: 'gemini-2.5-flash', placeholder: 'AIza...' },
-  openai: { label: 'OpenAI', model: 'gpt-4o-mini', placeholder: 'sk-...' },
-  groq: { label: 'Groq', model: 'llama-3.3-70b-versatile', placeholder: 'gsk_...' },
-  openrouter: { label: 'OpenRouter', model: 'google/gemini-2.0-flash-001', placeholder: 'sk-or-...' },
+  gemini: { label: 'Google Gemini', model: 'gemini-3.1-flash-lite', placeholder: 'AIza...' },
+  openai: { label: 'OpenAI', model: 'gpt-5.6-luna', placeholder: 'sk-...' },
+  groq: { label: 'Groq', model: 'openai/gpt-oss-20b', placeholder: 'gsk_...' },
+  openrouter: { label: 'OpenRouter', model: 'google/gemini-3.1-flash-lite', placeholder: 'sk-or-...' },
 };
 
 export type FileChangeStatus = 'M' | 'A' | 'D' | 'R' | 'U';

@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { SYSTEM_PROMPT, USER_PROMPT_TEMPLATE } from '../prompts/conventionalCommit';
-import { ErrorCode, GenerateOptions } from '../types';
+import { ErrorCode, GenerateOptions, PROVIDER_INFO } from '../types';
 
 export class GeminiError extends Error {
   constructor(
@@ -20,8 +20,7 @@ export async function generateCommitMessage(
 ): Promise<string> {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    // User requested gemini-2.5-flash to avoid rate limits
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: PROVIDER_INFO.gemini.model });
 
     const result = await model.generateContent({
       contents: [{
