@@ -2,6 +2,13 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.3] - 2026-07-17
+
+### Fixed
+- Unified API key setup between the sidebar and Command Palette for every provider.
+- Rendered repository file names and paths safely without injecting HTML into the webview.
+- Added accessible labels to dynamically rendered file actions.
+
 ## [1.1.2] - 2026-07-17
 
 ### Changed

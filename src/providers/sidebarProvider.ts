@@ -103,7 +103,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         break;
 
       case 'setApiKey':
-        await this.handleSetApiKey();
+        await this.setApiKey();
         break;
 
       case 'copyToClipboard':
@@ -258,7 +258,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private async handleSetApiKey(): Promise<void> {
+  async setApiKey(): Promise<void> {
     const config = vscode.workspace.getConfiguration('cleancommit');
     const providerType = config.get<AIProviderType>('provider', 'gemini');
     const providerInfo = PROVIDER_INFO[providerType];

@@ -67,46 +67,67 @@ function updateUI() {
 function createFileItem(file, isStaged) {
   const div = document.createElement('div');
   div.className = 'file-item';
-  
-  const actionsHtml = isStaged 
-    ? `<button class="btn-unstage-file" title="Unstage file"><i data-lucide="minus-circle"></i></button>`
-    : `<button class="btn-stage-file" title="Stage file"><i data-lucide="plus-circle"></i></button>
-       <button class="btn-discard-file" title="Discard changes"><i data-lucide="trash-2"></i></button>`;
 
-  div.innerHTML = `
-    <span class="file-status ${file.status}" title="${getStatusLabel(file.status)}">${file.status}</span>
-    <span class="file-name" title="${file.path}">${file.fileName}</span>
-    <div class="file-actions">
-      ${actionsHtml}
-    </div>
-  `;
+  const status = document.createElement('span');
+  status.className = `file-status ${file.status}`;
+  status.title = getStatusLabel(file.status);
+  status.textContent = file.status;
 
-  // Event Listeners for actions
-  const btnStage = div.querySelector('.btn-stage-file');
-  if (btnStage) {
-    btnStage.addEventListener('click', (e) => {
-      e.stopPropagation();
-      vscode.postMessage({ command: 'stageFile', path: file.path });
-    });
+  const name = document.createElement('span');
+  name.className = 'file-name';
+  name.title = file.path;
+  name.textContent = file.fileName;
+
+  const actions = document.createElement('div');
+  actions.className = 'file-actions';
+
+  if (isStaged) {
+    actions.appendChild(createFileAction(
+      'btn-unstage-file',
+      'Unstage file',
+      'minus-circle',
+      'unstageFile',
+      file.path
+    ));
+  } else {
+    actions.appendChild(createFileAction(
+      'btn-stage-file',
+      'Stage file',
+      'plus-circle',
+      'stageFile',
+      file.path
+    ));
+    actions.appendChild(createFileAction(
+      'btn-discard-file',
+      'Discard changes',
+      'trash-2',
+      'discardFile',
+      file.path
+    ));
   }
 
-  const btnUnstage = div.querySelector('.btn-unstage-file');
-  if (btnUnstage) {
-    btnUnstage.addEventListener('click', (e) => {
-      e.stopPropagation();
-      vscode.postMessage({ command: 'unstageFile', path: file.path });
-    });
-  }
-
-  const btnDiscard = div.querySelector('.btn-discard-file');
-  if (btnDiscard) {
-    btnDiscard.addEventListener('click', (e) => {
-      e.stopPropagation();
-      vscode.postMessage({ command: 'discardFile', path: file.path });
-    });
-  }
+  div.append(status, name, actions);
 
   return div;
+}
+
+function createFileAction(className, label, iconName, command, filePath) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = className;
+  button.title = label;
+  button.setAttribute('aria-label', label);
+
+  const icon = document.createElement('i');
+  icon.dataset.lucide = iconName;
+  button.appendChild(icon);
+
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    vscode.postMessage({ command, path: filePath });
+  });
+
+  return button;
 }
 
 function getStatusLabel(status) {
@@ -121,7 +142,7 @@ function getStatusLabel(status) {
 }
 
 function renderFileList(container, files, emptyText, isStaged) {
-  container.innerHTML = '';
+  container.replaceChildren();
   if (files.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'empty-state';
