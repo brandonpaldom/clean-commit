@@ -2,6 +2,13 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.2] - 2026-07-17
+
+### Changed
+- Migrated dependency management from npm to pnpm with a reproducible lockfile.
+- Updated project scripts to use pnpm and pinned the package manager version.
+- Updated development tooling and secured vulnerable transitive dependencies.
+
 ## [1.1.1] - 2026-07-17
 
 ### Changed
