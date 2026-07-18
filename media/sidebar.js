@@ -20,9 +20,11 @@ const elements = {
   error: document.getElementById('error'),
   success: document.getElementById('success'),
   repositoryState: document.getElementById('repository-state'),
+  repositorySummary: document.getElementById('repository-summary'),
   operationStatus: document.getElementById('operation-status'),
   operationLabel: document.getElementById('operation-label'),
   changesActions: document.getElementById('changes-actions'),
+  dangerActions: document.getElementById('danger-actions'),
   changesList: document.getElementById('changes-list'),
   stagedList: document.getElementById('staged-list'),
   changesCount: document.getElementById('changes-count'),
@@ -74,9 +76,15 @@ function updateUI() {
   elements.mainContent.setAttribute('aria-busy', String(isBusy));
 
   elements.btnGenerate.disabled = !state.hasApiKey || !state.hasStagedChanges || isBusy;
+  elements.btnGenerate.classList.toggle('hidden', state.hasGenerated);
   elements.btnRegenerate.classList.toggle('hidden', !state.hasGenerated);
   elements.btnRegenerate.disabled = !state.hasApiKey || !state.hasStagedChanges || isBusy;
   elements.btnCommit.disabled = !state.hasRepository || !state.hasStagedChanges || isBusy || !elements.commitMessage.value.trim();
+  const hasCommitMessage = !!elements.commitMessage.value.trim();
+  elements.btnGenerate.classList.toggle('primary', !hasCommitMessage && !state.hasGenerated);
+  elements.btnGenerate.classList.toggle('secondary', hasCommitMessage || state.hasGenerated);
+  elements.btnCommit.classList.toggle('primary', hasCommitMessage);
+  elements.btnCommit.classList.toggle('secondary', !hasCommitMessage);
   elements.btnStageAll.disabled = isBusy;
   elements.btnUnstageAll.disabled = isBusy;
   elements.btnDiscardAll.disabled = isBusy;
@@ -87,6 +95,7 @@ function updateUI() {
   elements.btnResetModel.disabled = isBusy;
   elements.btnUnstageAll.classList.toggle('hidden', state.stagedCount === 0);
   elements.changesActions.classList.toggle('hidden', state.changesCount === 0);
+  elements.dangerActions.classList.toggle('hidden', state.changesCount === 0);
   document.querySelectorAll('.file-actions button').forEach(button => {
     button.disabled = isBusy;
   });
@@ -102,6 +111,11 @@ function updateUI() {
       : '';
   elements.repositoryState.classList.toggle('hidden', !repositoryMessage);
   elements.repositoryState.textContent = repositoryMessage;
+  elements.repositorySummary.textContent = !state.hasRepository
+    ? 'No repository'
+    : state.changesCount === 0 && state.stagedCount === 0
+      ? 'Working tree clean'
+      : `${state.stagedCount} staged · ${state.changesCount} changed`;
 
   elements.error.classList.toggle('hidden', !state.error);
   if (state.error) {
@@ -202,7 +216,12 @@ function renderFileList(container, files, emptyText, isStaged) {
   if (files.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'empty-state';
-    empty.textContent = emptyText;
+    const icon = document.createElement('i');
+    icon.dataset.lucide = isStaged ? 'inbox' : 'check-circle-2';
+    icon.setAttribute('aria-hidden', 'true');
+    const label = document.createElement('span');
+    label.textContent = emptyText;
+    empty.append(icon, label);
     container.appendChild(empty);
     return;
   }

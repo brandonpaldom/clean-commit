@@ -4,13 +4,48 @@
 }
 
 body {
-  padding: 10px;
+  padding: 12px;
   color: var(--vscode-foreground);
   font-family: var(--vscode-font-family);
   font-size: var(--vscode-font-size);
   background-color: var(--vscode-sideBar-background);
   margin: 0;
   overflow-x: hidden;
+}
+
+.sidebar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  margin-bottom: 10px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+}
+
+.repository-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.repository-summary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-toolbar .icon-button {
+  flex: 0 0 auto;
+  padding: 5px;
+  color: var(--vscode-descriptionForeground);
+  background: transparent;
+}
+
+.sidebar-toolbar .icon-button:hover {
+  color: var(--vscode-foreground);
+  background: var(--vscode-toolbar-hoverBackground);
 }
 
 .hidden {
@@ -131,14 +166,25 @@ textarea:focus-visible {
 
 /* v0.2.0 Changes Panel */
 .section {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+}
+
+.section-card {
+  padding: 10px;
+  background: var(--vscode-sideBarSectionHeader-background, transparent);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+}
+
+.commit-section {
+  border-color: var(--vscode-sideBarSectionHeader-border, var(--vscode-panel-border));
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 0 0 8px;
   font-weight: 600;
   font-size: 11px;
   text-transform: uppercase;
@@ -158,7 +204,7 @@ textarea:focus-visible {
 .file-list {
   max-height: 200px;
   overflow-y: auto;
-  margin: 4px 0 12px 0;
+  margin: 0 0 10px;
   border: 1px solid var(--vscode-panel-border);
   border-radius: 4px;
 }
@@ -166,6 +212,7 @@ textarea:focus-visible {
 .file-item {
   display: flex;
   align-items: center;
+  min-height: 30px;
   padding: 6px 8px;
   font-size: 12px;
   border-bottom: 1px solid var(--vscode-panel-border);
@@ -237,14 +284,15 @@ textarea:focus-visible {
 
 .button-row button {
   flex: 1;
+  min-width: 0;
+}
+
+.button-row button.primary {
+  width: auto;
 }
 
 .full-width {
   width: 100%;
-}
-
-.btn-danger {
-  background: var(--vscode-statusBarItem-errorBackground, #c74e39);
 }
 
 .commit-input {
@@ -273,11 +321,40 @@ textarea:focus-visible {
 }
 
 .empty-state {
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 12px;
   text-align: center;
   color: var(--vscode-descriptionForeground);
   font-size: 11px;
   font-style: italic;
+}
+
+.empty-state .lucide {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+}
+
+.danger-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vscode-panel-border);
+}
+
+button.danger-link {
+  padding: 4px 6px;
+  color: var(--vscode-errorForeground);
+  background: transparent;
+}
+
+button.danger-link:hover {
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-statusBarItem-errorBackground, var(--vscode-inputValidation-errorBackground));
 }
 
 /* Loading & Footer */
@@ -297,9 +374,8 @@ textarea:focus-visible {
 }
 
 .footer {
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 1px solid var(--vscode-panel-border);
+  margin-top: 4px;
+  padding-top: 4px;
   display: flex;
   justify-content: flex-end;
 }
@@ -346,7 +422,7 @@ button.icon-button .lucide {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 8px;
-  padding: 8px;
+  padding: 10px;
   background: var(--vscode-editor-inactiveSelectionBackground);
   border-radius: 4px;
 }
@@ -399,6 +475,7 @@ button.icon-button .lucide {
   align-items: center;
   gap: 6px;
   min-width: 0;
+  margin-right: auto;
 }
 
 .provider-summary code {
@@ -425,7 +502,7 @@ button.icon-button .lucide {
   padding: 2px 4px;
   color: var(--vscode-textLink-foreground);
   cursor: pointer;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .link-button:hover {
@@ -441,6 +518,29 @@ button.icon-button .lucide {
 .hint {
   font-size: 11px;
   opacity: 0.7;
+}
+
+@media (max-width: 260px) {
+  body {
+    padding: 8px;
+  }
+
+  .quick-settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .checkbox-setting,
+  .provider-info {
+    grid-column: 1;
+  }
+
+  .button-row {
+    flex-wrap: wrap;
+  }
+
+  .button-row button {
+    flex-basis: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -2,6 +2,17 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.9] - 2026-07-17
+
+### Changed
+- Polished sidebar hierarchy, spacing, repository summary, panels, and responsive layout.
+- Kept a single primary action based on whether a commit message is available.
+- Separated destructive actions and improved empty states across VS Code themes.
+
+### Fixed
+- Prevented action buttons from overflowing narrow sidebars.
+- Replaced Generate with Regenerate after a message has been generated instead of showing both.
+
 ## [1.1.8] - 2026-07-17
 
 ### Added

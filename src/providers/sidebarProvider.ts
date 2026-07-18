@@ -384,14 +384,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     </head>
     <body>
       <div id="main-content" aria-busy="false">
+        <div class="sidebar-toolbar">
+          <div class="repository-summary">
+            <i data-lucide="git-branch" aria-hidden="true"></i>
+            <span id="repository-summary">Loading repository...</span>
+          </div>
+          <button class="icon-button" id="btn-refresh" title="Refresh changes" aria-label="Refresh changes">
+            <i data-lucide="refresh-cw" aria-hidden="true"></i>
+          </button>
+        </div>
+
         <div id="repository-state" class="state-callout hidden" role="status" aria-live="polite"></div>
 
-        <div class="section">
+        <div class="section section-card commit-section">
           <div class="section-header">
             <span>Commit Message</span>
-            <button class="icon-button" id="btn-refresh" title="Refresh changes" aria-label="Refresh changes">
-              <i data-lucide="refresh-cw" aria-hidden="true"></i>
-            </button>
           </div>
 
           <div id="no-api-key" class="setup-callout hidden">
@@ -413,8 +420,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <button class="secondary hidden" id="btn-regenerate" title="Regenerate message">
               <i data-lucide="refresh-cw"></i> Regenerate
             </button>
-            <button class="primary btn-commit" id="btn-commit" title="Commit staged changes">
-              <i data-lucide="rocket"></i> Commit
+            <button class="secondary btn-commit" id="btn-commit" title="Commit staged changes">
+              <i data-lucide="check"></i> Commit
             </button>
           </div>
           
@@ -470,9 +477,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <div id="error" class="error hidden" role="alert" aria-live="assertive"></div>
         <div id="success" class="success hidden" role="status" aria-live="polite"></div>
 
-        <div class="divider"></div>
-
-        <div class="section">
+        <div class="section section-card">
           <div class="section-header">
             <span>Staged Changes</span>
             <span class="counter" id="staged-count">0</span>
@@ -483,9 +488,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <button class="secondary full-width hidden" id="btn-unstage-all">Unstage All</button>
         </div>
 
-        <div class="divider"></div>
-
-        <div class="section">
+        <div class="section section-card">
           <div class="section-header">
             <span>Changes</span>
             <span class="counter" id="changes-count">0</span>
@@ -494,8 +497,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <div class="empty-state">No changes</div>
           </div>
           <div class="button-row hidden" id="changes-actions">
-            <button class="secondary" id="btn-stage-all">Stage All</button>
-            <button class="secondary btn-danger" id="btn-discard-all">Discard All</button>
+            <button class="secondary full-width" id="btn-stage-all">
+              <i data-lucide="plus-circle" aria-hidden="true"></i> Stage All
+            </button>
+          </div>
+          <div class="danger-actions hidden" id="danger-actions">
+            <button class="danger-link" id="btn-discard-all">
+              <i data-lucide="trash-2" aria-hidden="true"></i> Discard All
+            </button>
           </div>
         </div>
       </div>
