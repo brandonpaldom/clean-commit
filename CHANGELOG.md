@@ -2,6 +2,11 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.11] - 2026-07-17
+
+### Fixed
+- Corrected the Marketplace installation command to use the current publisher identifier.
+
 ## [1.1.10] - 2026-07-17
 
 ### Added

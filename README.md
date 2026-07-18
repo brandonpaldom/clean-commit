@@ -34,7 +34,7 @@ Generate clear, consistent, and meaningful commit messages in seconds using your
 Or install from the command line:
 
 ```bash
-code --install-extension cleancommit-dev.clean-commit
+code --install-extension brandonpalmeros.clean-commit
 ```
 
 ## Getting Started
