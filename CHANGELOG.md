@@ -2,6 +2,15 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.5] - 2026-07-17
+
+### Added
+- Added clear sidebar states for missing repositories, clean repositories, Git operations, and successful commits.
+
+### Changed
+- Serialized Git operations and disabled conflicting actions while an operation is running.
+- Hid bulk actions when there are no applicable files and refreshed changes after every operation.
+
 ## [1.1.4] - 2026-07-17
 
 ### Changed

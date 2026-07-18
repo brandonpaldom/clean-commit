@@ -35,6 +35,27 @@ p.info {
   font-size: 12px;
 }
 
+.success {
+  color: var(--vscode-testing-iconPassed);
+  background: var(--vscode-editor-inactiveSelectionBackground);
+  border: 1px solid var(--vscode-testing-iconPassed);
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.state-callout {
+  margin-bottom: 12px;
+  padding: 10px;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-editor-inactiveSelectionBackground);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .setup-callout {
   margin-bottom: 10px;
   padding: 10px;

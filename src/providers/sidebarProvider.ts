@@ -15,6 +15,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView;
   private gitService: GitService;
   private disposables: vscode.Disposable[] = [];
+  private gitOperationInProgress = false;
 
   constructor(
     private readonly extensionUri: vscode.Uri,
@@ -84,6 +85,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       type: 'changesUpdated',
       changes,
       staged,
+      hasRepository: !!this.gitService.getRepository(),
     });
   }
 
@@ -116,22 +118,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         break;
 
       case 'stageAll':
-        try {
-          await this.gitService.stageAll();
-          // No need to manually refresh here as the watcher will catch it, but let's be safe
-          await this.sendChangesUpdate();
-        } catch (error) {
-          this.showError('Failed to stage changes', error);
-        }
+        await this.runGitOperation('Staging all changes...', 'Failed to stage changes', () => this.gitService.stageAll());
         break;
 
       case 'unstageAll':
-        try {
-          await this.gitService.unstageAll();
-          await this.sendChangesUpdate();
-        } catch (error) {
-          this.showError('Failed to unstage changes', error);
-        }
+        await this.runGitOperation('Unstaging all changes...', 'Failed to unstage changes', () => this.gitService.unstageAll());
         break;
 
       case 'discardAll':
@@ -141,24 +132,20 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           'Discard'
         );
         if (confirm === 'Discard') {
-          try {
-            await this.gitService.discardAll();
-            await this.sendChangesUpdate();
-          } catch (error) {
-            this.showError('Failed to discard changes', error);
-          }
+          await this.runGitOperation('Discarding all changes...', 'Failed to discard changes', () => this.gitService.discardAll());
         }
         break;
 
       case 'commit':
-        try {
-          await this.gitService.commit(message.message);
-          this.postMessage({ type: 'commitSuccess' });
-          vscode.window.showInformationMessage('Commit created successfully!');
-          // The repository watcher should trigger a refresh automatically
-        } catch (error) {
-          this.showError('Failed to commit', error);
-        }
+        await this.runGitOperation(
+          'Creating commit...',
+          'Failed to commit',
+          () => this.gitService.commit(message.message),
+          () => {
+            this.postMessage({ type: 'commitSuccess' });
+            vscode.window.showInformationMessage('Commit created successfully!');
+          }
+        );
         break;
 
       case 'refreshChanges':
@@ -166,21 +153,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         break;
 
       case 'stageFile':
-        try {
-          await this.gitService.stageFile(message.path);
-          await this.sendChangesUpdate();
-        } catch (error) {
-          this.showError('Failed to stage file', error);
-        }
+        await this.runGitOperation('Staging file...', 'Failed to stage file', () => this.gitService.stageFile(message.path));
         break;
 
       case 'unstageFile':
-        try {
-          await this.gitService.unstageFile(message.path);
-          await this.sendChangesUpdate();
-        } catch (error) {
-          this.showError('Failed to unstage file', error);
-        }
+        await this.runGitOperation('Unstaging file...', 'Failed to unstage file', () => this.gitService.unstageFile(message.path));
         break;
 
       case 'discardFile':
@@ -190,14 +167,34 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           'Discard'
         );
         if (fileConfirm === 'Discard') {
-          try {
-            await this.gitService.discardFile(message.path);
-            await this.sendChangesUpdate();
-          } catch (error) {
-            this.showError('Failed to discard file', error);
-          }
+          await this.runGitOperation('Discarding file changes...', 'Failed to discard file', () => this.gitService.discardFile(message.path));
         }
         break;
+    }
+  }
+
+  private async runGitOperation(
+    label: string,
+    errorTitle: string,
+    operation: () => Promise<void>,
+    onSuccess?: () => void
+  ): Promise<void> {
+    if (this.gitOperationInProgress) {
+      return;
+    }
+
+    this.gitOperationInProgress = true;
+    this.postMessage({ type: 'operation', isLoading: true, label });
+
+    try {
+      await operation();
+      onSuccess?.();
+      await this.sendChangesUpdate();
+    } catch (error) {
+      this.showError(errorTitle, error);
+    } finally {
+      this.gitOperationInProgress = false;
+      this.postMessage({ type: 'operation', isLoading: false });
     }
   }
 
@@ -287,6 +284,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     const state: SidebarState = {
       hasApiKey: !!apiKey,
+      hasRepository: !!this.gitService.getRepository(),
       hasStagedChanges: !!diff,
       isLoading: false,
       generatedMessage: null,
@@ -319,6 +317,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     </head>
     <body>
       <div id="main-content">
+        <div id="repository-state" class="state-callout hidden"></div>
+
         <div class="section">
           <div class="section-header">
             <span>Commit Message</span>
@@ -363,7 +363,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <span>Generating...</span>
         </div>
 
+        <div id="operation-status" class="loading hidden">
+          <div class="spinner"></div>
+          <span id="operation-label">Updating repository...</span>
+        </div>
+
         <div id="error" class="error hidden"></div>
+        <div id="success" class="success hidden"></div>
 
         <div class="divider"></div>
 
@@ -375,7 +381,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <div id="staged-list" class="file-list">
             <div class="empty-state">No staged changes</div>
           </div>
-          <button class="secondary full-width" id="btn-unstage-all">Unstage All</button>
+          <button class="secondary full-width hidden" id="btn-unstage-all">Unstage All</button>
         </div>
 
         <div class="divider"></div>
@@ -388,7 +394,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           <div id="changes-list" class="file-list">
             <div class="empty-state">No changes</div>
           </div>
-          <div class="button-row">
+          <div class="button-row hidden" id="changes-actions">
             <button class="secondary" id="btn-stage-all">Stage All</button>
             <button class="secondary btn-danger" id="btn-discard-all">Discard All</button>
           </div>

@@ -73,11 +73,13 @@ export type ExtensionToWebviewMessage =
   | { type: 'error'; error: string; code: ErrorCode }
   | { type: 'loading'; isLoading: boolean }
   | { type: 'diffInfo'; files: number; insertions: number; deletions: number }
-  | { type: 'changesUpdated'; changes: FileChange[]; staged: FileChange[] }
+  | { type: 'changesUpdated'; changes: FileChange[]; staged: FileChange[]; hasRepository: boolean }
+  | { type: 'operation'; isLoading: boolean; label?: string }
   | { type: 'commitSuccess' };
 
 export type SidebarState = {
   hasApiKey: boolean;
+  hasRepository: boolean;
   hasStagedChanges: boolean;
   isLoading: boolean;
   generatedMessage: string | null;
