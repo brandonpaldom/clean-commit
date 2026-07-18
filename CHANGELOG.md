@@ -2,6 +2,16 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.8] - 2026-07-17
+
+### Added
+- Added keyboard-accessible file actions and a Control/Command+Enter commit shortcut.
+- Added screen reader labels, live status announcements, and busy-state semantics.
+
+### Changed
+- Improved focus visibility, reduced-motion support, and forced-colors compatibility.
+- Returned focus to the commit message after generation and successful commits.
+
 ## [1.1.7] - 2026-07-17
 
 ### Added

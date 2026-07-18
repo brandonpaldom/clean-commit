@@ -383,14 +383,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       <title>CleanCommit</title>
     </head>
     <body>
-      <div id="main-content">
-        <div id="repository-state" class="state-callout hidden"></div>
+      <div id="main-content" aria-busy="false">
+        <div id="repository-state" class="state-callout hidden" role="status" aria-live="polite"></div>
 
         <div class="section">
           <div class="section-header">
             <span>Commit Message</span>
-            <button class="icon-button" id="btn-refresh" title="Refresh changes">
-              <i data-lucide="refresh-cw"></i>
+            <button class="icon-button" id="btn-refresh" title="Refresh changes" aria-label="Refresh changes">
+              <i data-lucide="refresh-cw" aria-hidden="true"></i>
             </button>
           </div>
 
@@ -402,7 +402,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             </button>
           </div>
 
-          <textarea id="commit-message" class="commit-input" placeholder="Enter commit message or generate..."></textarea>
+          <label class="sr-only" for="commit-message">Commit message</label>
+          <textarea id="commit-message" class="commit-input" placeholder="Enter commit message or generate..." aria-describedby="commit-message-hint"></textarea>
+          <span class="sr-only" id="commit-message-hint">Press Control Enter or Command Enter to commit staged changes.</span>
           
           <div class="button-row">
             <button class="primary" id="btn-generate" title="Generate with AI">
@@ -455,18 +457,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           </div>
         </div>
 
-        <div id="loading" class="loading hidden">
-          <div class="spinner"></div>
+        <div id="loading" class="loading hidden" role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
           <span>Generating...</span>
         </div>
 
-        <div id="operation-status" class="loading hidden">
-          <div class="spinner"></div>
+        <div id="operation-status" class="loading hidden" role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
           <span id="operation-label">Updating repository...</span>
         </div>
 
-        <div id="error" class="error hidden"></div>
-        <div id="success" class="success hidden"></div>
+        <div id="error" class="error hidden" role="alert" aria-live="assertive"></div>
+        <div id="success" class="success hidden" role="status" aria-live="polite"></div>
 
         <div class="divider"></div>
 
@@ -475,7 +477,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <span>Staged Changes</span>
             <span class="counter" id="staged-count">0</span>
           </div>
-          <div id="staged-list" class="file-list">
+          <div id="staged-list" class="file-list" role="list" aria-label="Staged changes">
             <div class="empty-state">No staged changes</div>
           </div>
           <button class="secondary full-width hidden" id="btn-unstage-all">Unstage All</button>
@@ -488,7 +490,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             <span>Changes</span>
             <span class="counter" id="changes-count">0</span>
           </div>
-          <div id="changes-list" class="file-list">
+          <div id="changes-list" class="file-list" role="list" aria-label="Unstaged changes">
             <div class="empty-state">No changes</div>
           </div>
           <div class="button-row hidden" id="changes-actions">

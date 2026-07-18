@@ -3,6 +3,7 @@ const vscode = acquireVsCodeApi();
 const elements = {
   noApiKey: document.getElementById('no-api-key'),
   noApiKeyText: document.getElementById('no-api-key-text'),
+  mainContent: document.getElementById('main-content'),
   btnSetKey: document.getElementById('btn-set-key'),
   btnChangeKey: document.getElementById('btn-change-key'),
   btnResetModel: document.getElementById('btn-reset-model'),
@@ -70,6 +71,7 @@ function updateUI() {
   elements.includeBody.checked = state.includeBody;
 
   const isBusy = state.isLoading || state.isOperating;
+  elements.mainContent.setAttribute('aria-busy', String(isBusy));
 
   elements.btnGenerate.disabled = !state.hasApiKey || !state.hasStagedChanges || isBusy;
   elements.btnRegenerate.classList.toggle('hidden', !state.hasGenerated);
@@ -118,10 +120,12 @@ function updateUI() {
 function createFileItem(file, isStaged) {
   const div = document.createElement('div');
   div.className = 'file-item';
+  div.setAttribute('role', 'listitem');
 
   const status = document.createElement('span');
   status.className = `file-status ${file.status}`;
   status.title = getStatusLabel(file.status);
+  status.setAttribute('aria-label', getStatusLabel(file.status));
   status.textContent = file.status;
 
   const name = document.createElement('span');
@@ -171,6 +175,7 @@ function createFileAction(className, label, iconName, command, filePath) {
 
   const icon = document.createElement('i');
   icon.dataset.lucide = iconName;
+  icon.setAttribute('aria-hidden', 'true');
   button.appendChild(icon);
 
   button.addEventListener('click', (event) => {
@@ -280,6 +285,13 @@ elements.commitMessage.addEventListener('input', () => {
   updateUI();
 });
 
+elements.commitMessage.addEventListener('keydown', (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && !elements.btnCommit.disabled) {
+    event.preventDefault();
+    elements.btnCommit.click();
+  }
+});
+
 // Handle messages from extension
 window.addEventListener('message', (event) => {
   const message = event.data;
@@ -298,6 +310,7 @@ window.addEventListener('message', (event) => {
 
     case 'commitGenerated':
       elements.commitMessage.value = message.message;
+      elements.commitMessage.focus();
       state.hasGenerated = true;
       state.error = null;
       break;
@@ -324,6 +337,7 @@ window.addEventListener('message', (event) => {
 
     case 'commitSuccess':
       elements.commitMessage.value = '';
+      elements.commitMessage.focus();
       state.hasGenerated = false;
       state.error = null;
       state.success = 'Commit created successfully.';

@@ -17,6 +17,18 @@ body {
   display: none !important;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Typography & Info */
 p.info {
   margin: 8px 0;
@@ -109,6 +121,14 @@ button:disabled {
   cursor: not-allowed;
 }
 
+button:focus-visible,
+select:focus-visible,
+input[type="checkbox"]:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
 /* v0.2.0 Changes Panel */
 .section {
   margin-bottom: 20px;
@@ -181,12 +201,16 @@ button:disabled {
 }
 
 .file-actions {
-  display: none;
+  display: flex;
   gap: 4px;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.file-item:hover .file-actions {
-  display: flex;
+.file-item:hover .file-actions,
+.file-item:focus-within .file-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .file-actions button {
@@ -235,10 +259,6 @@ button:disabled {
   font-family: var(--vscode-editor-font-family);
   font-size: 12px;
   resize: vertical;
-}
-
-.commit-input:focus {
-  outline: 1px solid var(--vscode-focusBorder);
 }
 
 .btn-commit {
@@ -351,11 +371,6 @@ button.icon-button .lucide {
   font: inherit;
 }
 
-.quick-setting select:focus {
-  outline: 1px solid var(--vscode-focusBorder);
-  outline-offset: 1px;
-}
-
 .checkbox-setting {
   grid-column: 1 / -1;
   display: flex;
@@ -426,4 +441,26 @@ button.icon-button .lucide {
 .hint {
   font-size: 11px;
   opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  button,
+  select,
+  textarea,
+  .file-list,
+  .state-callout,
+  .setup-callout {
+    border: 1px solid ButtonText;
+  }
 }
