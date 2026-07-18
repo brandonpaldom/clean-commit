@@ -2,6 +2,12 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.10] - 2026-07-17
+
+### Added
+- Added automated coverage for provider defaults, custom models, API key validation, prompts, diff truncation, settings, and contributed commands.
+- Added consistency checks between recommended provider models and their Settings defaults.
+
 ## [1.1.9] - 2026-07-17
 
 ### Changed
