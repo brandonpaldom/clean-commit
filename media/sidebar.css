@@ -35,6 +35,22 @@ p.info {
   font-size: 12px;
 }
 
+.setup-callout {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: var(--vscode-textBlockQuote-background);
+  border: 1px solid var(--vscode-textBlockQuote-border);
+  border-radius: 4px;
+}
+
+.setup-callout p:first-child {
+  margin-top: 0;
+}
+
+.setup-callout .hint {
+  margin-bottom: 10px;
+}
+
 /* Buttons */
 button {
   cursor: pointer;

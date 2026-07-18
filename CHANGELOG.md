@@ -2,6 +2,13 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.4] - 2026-07-17
+
+### Changed
+- Kept Git changes and manual commit actions available when no AI provider key is configured.
+- Limited the API key requirement to AI generation and regeneration actions.
+- Added an inline setup notice that explains which features remain available without AI.
+
 ## [1.1.3] - 2026-07-17
 
 ### Fixed

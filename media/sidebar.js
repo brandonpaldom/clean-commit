@@ -3,7 +3,6 @@ const vscode = acquireVsCodeApi();
 const elements = {
   noApiKey: document.getElementById('no-api-key'),
   noApiKeyText: document.getElementById('no-api-key-text'),
-  mainContent: document.getElementById('main-content'),
   btnSetKey: document.getElementById('btn-set-key'),
   btnChangeKey: document.getElementById('btn-change-key'),
   btnGenerate: document.getElementById('btn-generate'),
@@ -36,7 +35,6 @@ let state = {
 
 function updateUI() {
   elements.noApiKey.classList.toggle('hidden', state.hasApiKey);
-  elements.mainContent.classList.toggle('hidden', !state.hasApiKey);
 
   // Update the no-api-key message with current provider
   if (elements.noApiKeyText) {
@@ -48,9 +46,9 @@ function updateUI() {
     elements.providerBadge.textContent = state.providerLabel;
   }
 
-  elements.btnGenerate.disabled = !state.hasStagedChanges || state.isLoading;
+  elements.btnGenerate.disabled = !state.hasApiKey || !state.hasStagedChanges || state.isLoading;
   elements.btnRegenerate.classList.toggle('hidden', !state.hasGenerated);
-  elements.btnRegenerate.disabled = !state.hasStagedChanges || state.isLoading;
+  elements.btnRegenerate.disabled = !state.hasApiKey || !state.hasStagedChanges || state.isLoading;
   elements.btnCommit.disabled = !state.hasStagedChanges || state.isLoading || !elements.commitMessage.value.trim();
 
   elements.loading.classList.toggle('hidden', !state.isLoading);

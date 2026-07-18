@@ -318,13 +318,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       <title>CleanCommit</title>
     </head>
     <body>
-      <div id="no-api-key" class="hidden">
-        <p class="info" id="no-api-key-text">Set your API key to get started.</p>
-        <p class="info hint">You can change the AI provider in Settings.</p>
-        <button class="primary" id="btn-set-key">Set API Key</button>
-      </div>
- 
-      <div id="main-content" class="hidden">
+      <div id="main-content">
         <div class="section">
           <div class="section-header">
             <span>Commit Message</span>
@@ -332,6 +326,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               <i data-lucide="refresh-cw"></i>
             </button>
           </div>
+
+          <div id="no-api-key" class="setup-callout hidden">
+            <p class="info" id="no-api-key-text">Set your API key to generate commit messages.</p>
+            <p class="info hint">Git actions and manual commits remain available without AI.</p>
+            <button class="primary" id="btn-set-key">
+              <i data-lucide="key"></i> Set API Key
+            </button>
+          </div>
+
           <textarea id="commit-message" class="commit-input" placeholder="Enter commit message or generate..."></textarea>
           
           <div class="button-row">
