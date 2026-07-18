@@ -2,6 +2,15 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.6] - 2026-07-17
+
+### Added
+- Added quick sidebar controls for provider, language, and commit body generation.
+- Displayed the active provider model and added direct access to its API key setup.
+
+### Changed
+- Synchronized quick controls with VS Code Settings and disabled them during Git operations.
+
 ## [1.1.5] - 2026-07-17
 
 ### Added

@@ -57,6 +57,9 @@ export type WebviewToExtensionMessage =
   | { command: 'copyToClipboard'; text: string }
   | { command: 'openSettings' }
   | { command: 'setApiKey' }
+  | { command: 'changeProvider'; provider: AIProviderType }
+  | { command: 'changeLanguage'; language: 'en' | 'es' }
+  | { command: 'changeIncludeBody'; includeBody: boolean }
   | { command: 'webviewReady' }
   | { command: 'stageAll' }
   | { command: 'unstageAll' }
@@ -86,6 +89,9 @@ export type SidebarState = {
   error: string | null;
   currentProvider: AIProviderType;
   providerLabel: string;
+  providerModel: string;
+  language: 'en' | 'es';
+  includeBody: boolean;
 };
 
 export interface GenerateOptions {

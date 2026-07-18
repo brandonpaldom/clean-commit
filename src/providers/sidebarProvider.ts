@@ -63,7 +63,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private setupConfigurationWatcher(): void {
     const disposable = vscode.workspace.onDidChangeConfiguration((e) => {
       // Re-check API key status when provider changes
-      if (e.affectsConfiguration('cleancommit.provider')) {
+      if (
+        e.affectsConfiguration('cleancommit.provider') ||
+        e.affectsConfiguration('cleancommit.language') ||
+        e.affectsConfiguration('cleancommit.includeBody')
+      ) {
         this.sendInitialState();
       }
     });
@@ -106,6 +110,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
       case 'setApiKey':
         await this.setApiKey();
+        break;
+
+      case 'changeProvider':
+        await this.updateSetting('provider', message.provider);
+        break;
+
+      case 'changeLanguage':
+        await this.updateSetting('language', message.language);
+        break;
+
+      case 'changeIncludeBody':
+        await this.updateSetting('includeBody', message.includeBody);
         break;
 
       case 'copyToClipboard':
@@ -274,6 +290,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  private async updateSetting(
+    key: 'provider' | 'language' | 'includeBody',
+    value: AIProviderType | 'en' | 'es' | boolean
+  ): Promise<void> {
+    const config = vscode.workspace.getConfiguration('cleancommit');
+    await config.update(key, value, vscode.ConfigurationTarget.Global);
+    await this.sendInitialState();
+  }
+
   private async sendInitialState(): Promise<void> {
     const config = vscode.workspace.getConfiguration('cleancommit');
     const providerType = config.get<AIProviderType>('provider', 'gemini');
@@ -281,6 +306,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const secretKey = PROVIDER_SECRET_KEYS[providerType];
     const apiKey = await this.secrets.get(secretKey);
     const diff = await this.gitService.getStagedDiff();
+    const language = config.get<'en' | 'es'>('language', 'en');
+    const includeBody = config.get('includeBody', false);
 
     const state: SidebarState = {
       hasApiKey: !!apiKey,
@@ -291,6 +318,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       error: null,
       currentProvider: providerType,
       providerLabel: providerInfo.label,
+      providerModel: providerInfo.model,
+      language,
+      includeBody,
     };
 
     this.postMessage({ type: 'setState', state });
@@ -349,12 +379,39 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             </button>
           </div>
           
-          <div class="provider-info">
-            <span class="provider-label">Provider:</span>
-            <span class="provider-badge" id="provider-badge">Loading...</span>
-            <button class="link-button" id="btn-change-key" title="Change API Key">
-              <i data-lucide="key"></i>
-            </button>
+          <div class="quick-settings">
+            <label class="quick-setting">
+              <span>Provider</span>
+              <select id="provider-select">
+                <option value="gemini">Google Gemini</option>
+                <option value="openai">OpenAI</option>
+                <option value="groq">Groq</option>
+                <option value="openrouter">OpenRouter</option>
+              </select>
+            </label>
+
+            <label class="quick-setting">
+              <span>Language</span>
+              <select id="language-select">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+              </select>
+            </label>
+
+            <label class="checkbox-setting">
+              <input type="checkbox" id="include-body">
+              <span>Include commit body</span>
+            </label>
+
+            <div class="provider-info">
+              <div class="provider-summary">
+                <span class="provider-badge" id="provider-badge">Loading...</span>
+                <code id="provider-model"></code>
+              </div>
+              <button class="link-button" id="btn-change-key" title="Change API Key" aria-label="Change API Key">
+                <i data-lucide="key"></i>
+              </button>
+            </div>
           </div>
         </div>
 

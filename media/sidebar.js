@@ -26,6 +26,10 @@ const elements = {
   changesCount: document.getElementById('changes-count'),
   stagedCount: document.getElementById('staged-count'),
   providerBadge: document.getElementById('provider-badge'),
+  providerModel: document.getElementById('provider-model'),
+  providerSelect: document.getElementById('provider-select'),
+  languageSelect: document.getElementById('language-select'),
+  includeBody: document.getElementById('include-body'),
 };
 
 let state = {
@@ -42,6 +46,9 @@ let state = {
   stagedCount: 0,
   currentProvider: 'gemini',
   providerLabel: 'Google Gemini',
+  providerModel: '',
+  language: 'en',
+  includeBody: false,
 };
 
 function updateUI() {
@@ -56,6 +63,10 @@ function updateUI() {
   if (elements.providerBadge) {
     elements.providerBadge.textContent = state.providerLabel;
   }
+  elements.providerModel.textContent = state.providerModel;
+  elements.providerSelect.value = state.currentProvider;
+  elements.languageSelect.value = state.language;
+  elements.includeBody.checked = state.includeBody;
 
   const isBusy = state.isLoading || state.isOperating;
 
@@ -67,6 +78,9 @@ function updateUI() {
   elements.btnUnstageAll.disabled = isBusy;
   elements.btnDiscardAll.disabled = isBusy;
   elements.btnRefresh.disabled = isBusy;
+  elements.providerSelect.disabled = isBusy;
+  elements.languageSelect.disabled = isBusy;
+  elements.includeBody.disabled = isBusy;
   elements.btnUnstageAll.classList.toggle('hidden', state.stagedCount === 0);
   elements.changesActions.classList.toggle('hidden', state.changesCount === 0);
   document.querySelectorAll('.file-actions button').forEach(button => {
@@ -201,6 +215,18 @@ elements.btnSetKey.addEventListener('click', () => {
 
 elements.btnChangeKey?.addEventListener('click', () => {
   vscode.postMessage({ command: 'setApiKey' });
+});
+
+elements.providerSelect.addEventListener('change', () => {
+  vscode.postMessage({ command: 'changeProvider', provider: elements.providerSelect.value });
+});
+
+elements.languageSelect.addEventListener('change', () => {
+  vscode.postMessage({ command: 'changeLanguage', language: elements.languageSelect.value });
+});
+
+elements.includeBody.addEventListener('change', () => {
+  vscode.postMessage({ command: 'changeIncludeBody', includeBody: elements.includeBody.checked });
 });
 
 elements.btnGenerate.addEventListener('click', () => {
