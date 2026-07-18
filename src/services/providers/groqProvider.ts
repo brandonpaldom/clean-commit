@@ -4,10 +4,11 @@ import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../
 
 export class GroqProvider implements AIProvider {
   readonly name = 'Groq';
-  readonly model = PROVIDER_INFO.groq.model;
+  readonly model: string;
   private client: Groq;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, model = PROVIDER_INFO.groq.model) {
+    this.model = model;
     this.client = new Groq({ apiKey });
   }
 

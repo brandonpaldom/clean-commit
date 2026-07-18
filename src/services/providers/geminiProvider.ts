@@ -4,9 +4,11 @@ import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../
 
 export class GeminiProvider implements AIProvider {
   readonly name = 'Google Gemini';
-  readonly model = PROVIDER_INFO.gemini.model;
+  readonly model: string;
 
-  constructor(private readonly apiKey: string) {}
+  constructor(private readonly apiKey: string, model = PROVIDER_INFO.gemini.model) {
+    this.model = model;
+  }
 
   async generateCommitMessage(diff: string, options: GenerateOptions): Promise<string> {
     try {

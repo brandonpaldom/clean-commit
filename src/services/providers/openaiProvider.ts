@@ -4,10 +4,11 @@ import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../
 
 export class OpenAIProvider implements AIProvider {
   readonly name = 'OpenAI';
-  readonly model = PROVIDER_INFO.openai.model;
+  readonly model: string;
   private client: OpenAI;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, model = PROVIDER_INFO.openai.model) {
+    this.model = model;
     this.client = new OpenAI({ apiKey });
   }
 

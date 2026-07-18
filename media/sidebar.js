@@ -5,6 +5,7 @@ const elements = {
   noApiKeyText: document.getElementById('no-api-key-text'),
   btnSetKey: document.getElementById('btn-set-key'),
   btnChangeKey: document.getElementById('btn-change-key'),
+  btnResetModel: document.getElementById('btn-reset-model'),
   btnGenerate: document.getElementById('btn-generate'),
   btnRegenerate: document.getElementById('btn-regenerate'),
   btnCommit: document.getElementById('btn-commit'),
@@ -81,6 +82,7 @@ function updateUI() {
   elements.providerSelect.disabled = isBusy;
   elements.languageSelect.disabled = isBusy;
   elements.includeBody.disabled = isBusy;
+  elements.btnResetModel.disabled = isBusy;
   elements.btnUnstageAll.classList.toggle('hidden', state.stagedCount === 0);
   elements.changesActions.classList.toggle('hidden', state.changesCount === 0);
   document.querySelectorAll('.file-actions button').forEach(button => {
@@ -215,6 +217,10 @@ elements.btnSetKey.addEventListener('click', () => {
 
 elements.btnChangeKey?.addEventListener('click', () => {
   vscode.postMessage({ command: 'setApiKey' });
+});
+
+elements.btnResetModel.addEventListener('click', () => {
+  vscode.postMessage({ command: 'resetModel' });
 });
 
 elements.providerSelect.addEventListener('change', () => {

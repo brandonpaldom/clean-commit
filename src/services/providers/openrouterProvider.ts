@@ -9,10 +9,11 @@ import { AIProvider, AIProviderError, GenerateOptions, PROVIDER_INFO } from '../
  */
 export class OpenRouterProvider implements AIProvider {
   readonly name = 'OpenRouter';
-  readonly model = PROVIDER_INFO.openrouter.model;
+  readonly model: string;
   private client: OpenAI;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, model = PROVIDER_INFO.openrouter.model) {
+    this.model = model;
     this.client = new OpenAI({
       apiKey,
       baseURL: 'https://openrouter.ai/api/v1',

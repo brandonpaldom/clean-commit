@@ -99,7 +99,12 @@ Configure CleanCommit in your editor settings (`Ctrl+,` / `Cmd+,`):
 | `cleancommit.provider` | AI provider (`gemini`, `openai`, `groq`, `openrouter`) | `gemini` |
 | `cleancommit.language` | Language for commit messages (`en` or `es`) | `en` |
 | `cleancommit.includeBody` | Include detailed body in commit message | `false` |
-| `cleancommit.maxDiffSize` | Maximum diff size sent for analysis (characters) | `4000` |
+| `cleancommit.maxDiffSize` | Maximum diff size sent for analysis (characters) | `12000` |
+| `cleancommit.confirmBeforeCommit` | Confirm before creating a commit | `false` |
+| `cleancommit.geminiModel` | Gemini model ID | `gemini-3.1-flash-lite` |
+| `cleancommit.openaiModel` | OpenAI model ID | `gpt-5.6-luna` |
+| `cleancommit.groqModel` | Groq model ID | `openai/gpt-oss-20b` |
+| `cleancommit.openrouterModel` | OpenRouter model slug | `google/gemini-3.1-flash-lite` |
 
 ## Commands
 
@@ -109,6 +114,7 @@ Access these commands via the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`):
 |---------|-------------|
 | `CleanCommit: Generate Commit Message` | Generate a message for staged changes |
 | `CleanCommit: Set API Key` | Configure or update your API key for the current provider |
+| `CleanCommit: Restore Recommended Model` | Restore the recommended model for the current provider |
 
 ## Compatibility
 

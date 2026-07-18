@@ -43,6 +43,13 @@ export const PROVIDER_INFO: Record<AIProviderType, { label: string; model: strin
   openrouter: { label: 'OpenRouter', model: 'google/gemini-3.1-flash-lite', placeholder: 'sk-or-...' },
 };
 
+export const PROVIDER_MODEL_SETTING_KEYS: Record<AIProviderType, string> = {
+  gemini: 'geminiModel',
+  openai: 'openaiModel',
+  groq: 'groqModel',
+  openrouter: 'openrouterModel',
+};
+
 export type FileChangeStatus = 'M' | 'A' | 'D' | 'R' | 'U';
 
 export interface FileChange {
@@ -60,6 +67,7 @@ export type WebviewToExtensionMessage =
   | { command: 'changeProvider'; provider: AIProviderType }
   | { command: 'changeLanguage'; language: 'en' | 'es' }
   | { command: 'changeIncludeBody'; includeBody: boolean }
+  | { command: 'resetModel' }
   | { command: 'webviewReady' }
   | { command: 'stageAll' }
   | { command: 'unstageAll' }

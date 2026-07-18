@@ -1,4 +1,4 @@
-import { AIProvider, AIProviderType, AIProviderError } from '../types';
+import { AIProvider, AIProviderType, AIProviderError, PROVIDER_INFO } from '../types';
 import { GeminiProvider, OpenAIProvider, GroqProvider, OpenRouterProvider } from './providers';
 
 /**
@@ -14,7 +14,11 @@ export const PROVIDER_SECRET_KEYS: Record<AIProviderType, string> = {
 /**
  * Creates an AI provider instance based on the specified type and API key
  */
-export function createProvider(type: AIProviderType, apiKey: string): AIProvider {
+export function createProvider(
+  type: AIProviderType,
+  apiKey: string,
+  model: string = PROVIDER_INFO[type].model
+): AIProvider {
   if (!apiKey) {
     throw new AIProviderError(
       `API key not configured for ${type}`,
@@ -26,13 +30,13 @@ export function createProvider(type: AIProviderType, apiKey: string): AIProvider
 
   switch (type) {
     case 'gemini':
-      return new GeminiProvider(apiKey);
+      return new GeminiProvider(apiKey, model);
     case 'openai':
-      return new OpenAIProvider(apiKey);
+      return new OpenAIProvider(apiKey, model);
     case 'groq':
-      return new GroqProvider(apiKey);
+      return new GroqProvider(apiKey, model);
     case 'openrouter':
-      return new OpenRouterProvider(apiKey);
+      return new OpenRouterProvider(apiKey, model);
     default:
       throw new AIProviderError(
         `Unknown provider: ${type}`,

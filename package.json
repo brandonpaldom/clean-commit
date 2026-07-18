@@ -2,7 +2,7 @@
   "name": "clean-commit",
   "displayName": "CleanCommit",
   "description": "AI-powered commit message generator using Conventional Commits",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "packageManager": "pnpm@11.14.0",
   "publisher": "brandonpalmeros",
   "icon": "resources/icon.png",
@@ -69,6 +69,11 @@
         "command": "cleancommit.setApiKey",
         "title": "Set API Key",
         "category": "CleanCommit"
+      },
+      {
+        "command": "cleancommit.resetModel",
+        "title": "Restore Recommended Model",
+        "category": "CleanCommit"
       }
     ],
     "configuration": {
@@ -77,6 +82,7 @@
         "cleancommit.provider": {
           "type": "string",
           "default": "gemini",
+          "scope": "window",
           "enum": [
             "gemini",
             "openai",
@@ -89,11 +95,18 @@
             "Groq (openai/gpt-oss-20b) - Compact and ultra fast",
             "OpenRouter (google/gemini-3.1-flash-lite) - Lightweight multi-provider access"
           ],
-          "description": "AI provider for commit message generation"
+          "enumItemLabels": [
+            "Google Gemini",
+            "OpenAI",
+            "Groq",
+            "OpenRouter"
+          ],
+          "markdownDescription": "AI provider used to generate commit messages. API keys are stored separately in VS Code Secret Storage."
         },
         "cleancommit.language": {
           "type": "string",
           "default": "en",
+          "scope": "window",
           "enum": [
             "en",
             "es"
@@ -102,17 +115,60 @@
             "English",
             "Spanish"
           ],
-          "description": "Language for generated commit messages"
+          "enumItemLabels": [
+            "English",
+            "Spanish"
+          ],
+          "description": "Language used for generated commit messages."
         },
         "cleancommit.includeBody": {
           "type": "boolean",
           "default": false,
-          "description": "Include detailed body in commit message"
+          "scope": "window",
+          "description": "Generate a detailed commit body below the Conventional Commit subject."
         },
         "cleancommit.maxDiffSize": {
           "type": "number",
-          "default": 4000,
-          "description": "Maximum diff size in characters to send to AI"
+          "default": 12000,
+          "minimum": 1000,
+          "maximum": 100000,
+          "multipleOf": 500,
+          "scope": "window",
+          "markdownDescription": "Maximum number of staged diff characters sent to the selected AI provider. Larger diffs are truncated. Higher values can increase latency and API cost."
+        },
+        "cleancommit.confirmBeforeCommit": {
+          "type": "boolean",
+          "default": false,
+          "scope": "window",
+          "description": "Ask for confirmation before creating a Git commit from the sidebar."
+        },
+        "cleancommit.geminiModel": {
+          "type": "string",
+          "default": "gemini-3.1-flash-lite",
+          "minLength": 1,
+          "scope": "window",
+          "markdownDescription": "Gemini model ID. Recommended: `gemini-3.1-flash-lite`. Run **CleanCommit: Restore Recommended Model** to reset it."
+        },
+        "cleancommit.openaiModel": {
+          "type": "string",
+          "default": "gpt-5.6-luna",
+          "minLength": 1,
+          "scope": "window",
+          "markdownDescription": "OpenAI model ID. Recommended: `gpt-5.6-luna`. Run **CleanCommit: Restore Recommended Model** to reset it."
+        },
+        "cleancommit.groqModel": {
+          "type": "string",
+          "default": "openai/gpt-oss-20b",
+          "minLength": 1,
+          "scope": "window",
+          "markdownDescription": "Groq model ID. Recommended: `openai/gpt-oss-20b`. Run **CleanCommit: Restore Recommended Model** to reset it."
+        },
+        "cleancommit.openrouterModel": {
+          "type": "string",
+          "default": "google/gemini-3.1-flash-lite",
+          "minLength": 1,
+          "scope": "window",
+          "markdownDescription": "OpenRouter model slug. Recommended: `google/gemini-3.1-flash-lite`. Run **CleanCommit: Restore Recommended Model** to reset it."
         }
       }
     }

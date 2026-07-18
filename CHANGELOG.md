@@ -2,6 +2,18 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.7] - 2026-07-17
+
+### Added
+- Added custom model settings for every AI provider and a command to restore recommended models.
+- Added optional confirmation before creating commits from the sidebar.
+
+### Changed
+- Improved setting labels, descriptions, scope, and validation.
+- Increased the default staged diff limit to 12,000 characters.
+- Used configured model overrides in provider requests and displayed the active model in the sidebar.
+- Excluded pnpm development files from marketplace packages.
+
 ## [1.1.6] - 2026-07-17
 
 ### Added

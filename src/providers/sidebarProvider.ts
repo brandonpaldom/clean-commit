@@ -9,7 +9,7 @@ import type {
   AIProviderType,
   AIProviderError
 } from '../types';
-import { PROVIDER_INFO } from '../types';
+import { PROVIDER_INFO, PROVIDER_MODEL_SETTING_KEYS } from '../types';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView;
@@ -62,12 +62,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private setupConfigurationWatcher(): void {
     const disposable = vscode.workspace.onDidChangeConfiguration((e) => {
-      // Re-check API key status when provider changes
-      if (
-        e.affectsConfiguration('cleancommit.provider') ||
-        e.affectsConfiguration('cleancommit.language') ||
-        e.affectsConfiguration('cleancommit.includeBody')
-      ) {
+      if (e.affectsConfiguration('cleancommit')) {
         this.sendInitialState();
       }
     });
@@ -124,6 +119,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         await this.updateSetting('includeBody', message.includeBody);
         break;
 
+      case 'resetModel':
+        await this.resetModel();
+        break;
+
       case 'copyToClipboard':
         await vscode.env.clipboard.writeText(message.text);
         vscode.window.showInformationMessage('Copied to clipboard!');
@@ -153,6 +152,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         break;
 
       case 'commit':
+        if (!(await this.confirmCommitIfNeeded(message.message))) {
+          break;
+        }
         await this.runGitOperation(
           'Creating commit...',
           'Failed to commit',
@@ -214,6 +216,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  private async confirmCommitIfNeeded(message: string): Promise<boolean> {
+    const config = vscode.workspace.getConfiguration('cleancommit');
+    if (!config.get('confirmBeforeCommit', false)) {
+      return true;
+    }
+
+    const subject = message.split('\n', 1)[0];
+    const confirmation = await vscode.window.showInformationMessage(
+      `Create commit “${subject}”?`,
+      { modal: true },
+      'Commit'
+    );
+    return confirmation === 'Commit';
+  }
+
   private showError(title: string, error: any) {
     const message = error instanceof Error ? error.message : String(error);
     vscode.window.showErrorMessage(`${title}: ${message}`);
@@ -245,13 +262,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         return;
       }
 
-      const maxDiffSize = config.get('maxDiffSize', 4000);
+      const maxDiffSize = config.get('maxDiffSize', 12000);
       const language = config.get('language', 'en');
       const includeBody = config.get('includeBody', false);
 
       const truncatedDiff = truncateDiff(diff, maxDiffSize);
       
-      const provider = createProvider(providerType, apiKey);
+      const provider = createProvider(providerType, apiKey, this.getConfiguredModel(config, providerType));
       const message = await provider.generateCommitMessage(truncatedDiff, {
         language,
         includeBody,
@@ -290,13 +307,33 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  async resetModel(): Promise<void> {
+    const config = vscode.workspace.getConfiguration('cleancommit');
+    const providerType = config.get<AIProviderType>('provider', 'gemini');
+    const settingKey = PROVIDER_MODEL_SETTING_KEYS[providerType];
+    await config.update(settingKey, undefined, vscode.ConfigurationTarget.Workspace);
+    await config.update(settingKey, undefined, vscode.ConfigurationTarget.Global);
+    vscode.window.showInformationMessage(
+      `${PROVIDER_INFO[providerType].label} model restored to ${PROVIDER_INFO[providerType].model}.`
+    );
+    await this.sendInitialState();
+  }
+
   private async updateSetting(
     key: 'provider' | 'language' | 'includeBody',
     value: AIProviderType | 'en' | 'es' | boolean
   ): Promise<void> {
     const config = vscode.workspace.getConfiguration('cleancommit');
-    await config.update(key, value, vscode.ConfigurationTarget.Global);
+    await config.update(key, value, vscode.ConfigurationTarget.Workspace);
     await this.sendInitialState();
+  }
+
+  private getConfiguredModel(
+    config: vscode.WorkspaceConfiguration,
+    providerType: AIProviderType
+  ): string {
+    const recommendedModel = PROVIDER_INFO[providerType].model;
+    return config.get<string>(PROVIDER_MODEL_SETTING_KEYS[providerType], recommendedModel).trim() || recommendedModel;
   }
 
   private async sendInitialState(): Promise<void> {
@@ -318,7 +355,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       error: null,
       currentProvider: providerType,
       providerLabel: providerInfo.label,
-      providerModel: providerInfo.model,
+      providerModel: this.getConfiguredModel(config, providerType),
       language,
       includeBody,
     };
@@ -410,6 +447,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
               </div>
               <button class="link-button" id="btn-change-key" title="Change API Key" aria-label="Change API Key">
                 <i data-lucide="key"></i>
+              </button>
+              <button class="link-button" id="btn-reset-model" title="Restore recommended model" aria-label="Restore recommended model">
+                <i data-lucide="rotate-ccw"></i>
               </button>
             </div>
           </div>

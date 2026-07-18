@@ -19,6 +19,10 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
+		vscode.commands.registerCommand('cleancommit.resetModel', () => sidebarProvider.resetModel())
+	);
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('cleancommit.generateCommit', () => {
 			// Focus the sidebar when the command is run
 			vscode.commands.executeCommand('cleancommit.sidebar.focus');
