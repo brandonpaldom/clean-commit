@@ -1,26 +1,28 @@
-// See https://go.microsoft.com/fwlink/?LinkId=733558
-// for the documentation about the tasks.json format
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
+    "version": "2.0.0",
+    "tasks": [
+        {
             "label": "watch",
             "dependsOn": [
-                "npm: watch:tsc",
-                "npm: watch:esbuild"
+                "pnpm: watch:tsc",
+                "pnpm: watch:esbuild"
             ],
-            "presentation": {
-                "reveal": "never"
-            },
+            "dependsOrder": "parallel",
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "never"
             }
         },
         {
-            "type": "npm",
-            "script": "watch:esbuild",
-            "group": "build",
+            "label": "pnpm: watch:esbuild",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["run", "watch:esbuild"],
+            "isBackground": true,
             "problemMatcher": {
                 "owner": "typescript",
                 "source": "esbuild",
@@ -44,43 +46,43 @@
                     "endsPattern": "^\\[watch\\] build finished$"
                 }
             },
-            "isBackground": true,
-            "label": "npm: watch:esbuild",
             "presentation": {
                 "group": "watch",
                 "reveal": "never"
             }
         },
-		{
-            "type": "npm",
-            "script": "watch:tsc",
-            "group": "build",
+        {
+            "label": "pnpm: watch:tsc",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["run", "watch:tsc"],
+            "isBackground": true,
             "problemMatcher": "$tsc-watch",
-            "isBackground": true,
-            "label": "npm: watch:tsc",
             "presentation": {
                 "group": "watch",
                 "reveal": "never"
             }
         },
-		{
-			"type": "npm",
-			"script": "watch-tests",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never",
-				"group": "watchers"
-			},
-			"group": "build"
-		},
-		{
-			"label": "tasks: watch-tests",
-			"dependsOn": [
-				"npm: watch",
-				"npm: watch-tests"
-			],
-			"problemMatcher": []
-		}
-	]
+        {
+            "label": "pnpm: watch-tests",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["run", "watch-tests"],
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch",
+            "presentation": {
+                "group": "watchers",
+                "reveal": "never"
+            }
+        },
+        {
+            "label": "tests: watch",
+            "dependsOn": [
+                "watch",
+                "pnpm: watch-tests"
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": []
+        }
+    ]
 }

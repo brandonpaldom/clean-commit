@@ -2,6 +2,14 @@
 
 All notable changes to the **CleanCommit** extension will be documented in this file.
 
+## [1.1.12] - 2026-07-17
+
+### Changed
+- Replaced the generated extension quickstart with pnpm-based development documentation.
+- Updated VS Code workspace tasks to run pnpm commands consistently.
+- Documented the validated manual release workflow and secure marketplace publishing process.
+- Updated release scripts to package and publish the same versioned VSIX.
+
 ## [1.1.11] - 2026-07-17
 
 ### Fixed
